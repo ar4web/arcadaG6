@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Arcada People Analytics — HR Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','sans-serif'],display:['Plus Jakarta Sans','sans-serif']},colors:{brand:{50:'#eef2ff',100:'#e0e7ff',500:'#6366f1',600:'#4f46e5',700:'#4338ca',900:'#1e1b4b'},ink:'#0f172a'},boxShadow:{card:'0 8px 30px -12px rgba(15,23,42,.18)',pop:'0 20px 60px -15px rgba(79,70,229,.35)'},keyframes:{pulseDot:{'0%,100%':{opacity:1},'50%':{opacity:.4}}}}}}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{-webkit-tap-highlight-color:transparent}body{font-family:Inter,sans-serif;background:#f1f5f9;color:#0f172a}
+.dark body,.dark{background:#020617!important;color:#e2e8f0}.dark .card{background:#0f172a!important;border-color:#1e293b!important;color:#e2e8f0}.dark .muted{color:#94a3b8!important}.dark header.topbar{background:rgba(2,6,23,.85)!important;border-color:#1e293b!important}.dark input,.dark select,.dark textarea{background:#1e293b!important;border-color:#334155!important;color:#e2e8f0!important}.dark table thead{background:#1e293b!important}.dark table tbody tr{border-color:#1e293b!important}.dark table tbody tr:hover{background:#1e293b!important}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:1.25rem;box-shadow:0 8px 30px -12px rgba(15,23,42,.12)}
+.muted{color:#64748b}.grad-text{background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad-bg{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 50%,#db2777 100%)}
+.grad-bg2{background:linear-gradient(135deg,#06b6d4,#6366f1,#a855f7)}
+.side-link{display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;border-radius:.9rem;color:#94a3b8;font-weight:600;font-size:.86rem;transition:.2s;cursor:pointer;border:1px solid transparent}
+.side-link:hover{background:rgba(255,255,255,.06);color:#fff}.side-link.active{background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(168,85,247,.18));color:#fff;border-color:rgba(129,140,248,.35);box-shadow:0 8px 24px -10px rgba(99,102,241,.5)}
+.side-link svg{width:20px;height:20px;flex-shrink:0}
+.kpi-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:800}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:99px}::-webkit-scrollbar-thumb:hover{background:#818cf8}
+table.data{width:100%;border-collapse:collapse;font-size:.84rem}table.data thead{background:#f8fafc;position:sticky;top:0;z-index:2}table.data th{ text-align:left;padding:.75rem .9rem;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#64748b;white-space:nowrap;cursor:pointer;user-select:none}table.data td{padding:.75rem .9rem;border-top:1px solid #f1f5f9;white-space:nowrap}table.data tbody tr{transition:.15s}table.data tbody tr:hover{background:#eef2ff}
+.badge{font-size:.68rem;font-weight:700;padding:.25rem .6rem;border-radius:99px;display:inline-flex;align-items:center;gap:.3rem}
+.avatar{width:34px;height:34px;border-radius:99px;display:inline-grid;place-items:center;color:#fff;font-weight:800;font-size:.72rem;flex-shrink:0}
+.chip{font-size:.72rem;font-weight:700;padding:.35rem .7rem;border-radius:99px;background:#f1f5f9;border:1px solid #e2e8f0;cursor:pointer;transition:.15s}.chip:hover{border-color:#6366f1;color:#4f46e5}.chip.on{background:#4f46e5;color:#fff;border-color:#4f46e5}
+.btn-primary{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;font-weight:700;padding:.65rem 1.1rem;border-radius:.9rem;font-size:.85rem;transition:.2s;box-shadow:0 10px 25px -8px rgba(79,70,229,.5)}.btn-primary:hover{transform:translateY(-1px);box-shadow:0 16px 32px -8px rgba(79,70,229,.55)}
+.btn-ghost{border:1px solid #e2e8f0;padding:.6rem 1rem;border-radius:.9rem;font-weight:700;font-size:.84rem;transition:.2s;background:#fff}.btn-ghost:hover{border-color:#6366f1;color:#4f46e5}
+.modal-bg{background:rgba(2,6,23,.6);backdrop-filter:blur(6px)}
+.toast{animation:slideIn .35s cubic-bezier(.21,1.02,.73,1)}@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+.fadein{animation:fade .4s ease}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.shimmer{background:linear-gradient(90deg,#e2e8f0 25%,#f8fafc 50%,#e2e8f0 75%);background-size:200% 100%;animation:sh 1.2s infinite}@keyframes sh{to{background-position:-200% 0}}
+.box9{border-radius:.9rem;border:2px solid #e2e8f0;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem;transition:.2s;cursor:pointer;background:#fff}.box9:hover{transform:scale(1.03);box-shadow:0 10px 25px -10px rgba(0,0,0,.2)}.box9 small{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.kanban-col{background:#f8fafc;border:1px solid #e2e8f0;border-radius:1rem;padding:.7rem;min-width:220px}.dark .kanban-col{background:#0f172a;border-color:#1e293b}
+.cand{background:#fff;border:1px solid #e2e8f0;border-radius:.9rem;padding:.7rem;margin-bottom:.6rem;cursor:grab;transition:.2s}.cand:hover{box-shadow:0 8px 20px -8px rgba(0,0,0,.2);transform:translateY(-1px)}.dark .cand{background:#1e293b;border-color:#334155}
+input,select,textarea{outline:none}input:focus,select:focus,textarea:focus{border-color:#6366f1!important;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+.pulse-dot{width:8px;height:8px;border-radius:99px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.2);animation:pulseDot 1.6s infinite}
+.nav-page{display:none}.nav-page.active{display:block}
+.timeline-dot{width:10px;height:10px;border-radius:99px}
+#cmdK kbd{background:#f1f5f9;border:1px solid #cbd5e1;border-radius:.4rem;padding:.1rem .4rem;font-size:.7rem}
+.ai-msg{background:#f1f5f9;border-radius:1rem 1rem 1rem .2rem;padding:.7rem .9rem;font-size:.84rem}.dark .ai-msg{background:#1e293b}
+.user-msg{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border-radius:1rem 1rem .2rem 1rem;padding:.7rem .9rem;font-size:.84rem}
+.risk-bar{height:8px;border-radius:99px;background:#f1f5f9;overflow:hidden}.risk-fill{height:100%;border-radius:99px;transition:width 1s ease}
+select.globalF{background:#f8fafc;border:1px solid #e2e8f0;border-radius:.8rem;padding:.55rem .8rem;font-size:.8rem;font-weight:600}
+.progress-ring{transform:rotate(-90deg)}
+</style>
+</head>
+<body class="antialiased">
+
+<!-- LOGIN -->
+<div id="loginScreen" class="fixed inset-0 z-[100] flex">
+  <div class="hidden lg:flex w-[55%] relative overflow-hidden bg-slate-950 text-white flex-col justify-between p-12">
+    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q80&w=1600&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-30" alt=""/>
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-950/90 via-slate-950/70 to-fuchsia-950/60"></div>
+    <div class="relative flex items-center gap-3"><div class="w-11 h-11 rounded-2xl grad-bg grid place-items-center font-display font-800 text-xl shadow-pop">A</div><div><div class="font-display font-800 text-lg tracking-tight">Arcada People Analytics</div><div class="text-xs text-indigo-200 tracking-widest uppercase">HR Intelligence Cloud • v4.2</div></div></div>
+    <div class="relative">
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full px-3 py-1 text-xs font-semibold mb-5"><span class="pulse-dot"></span> Live backend connected • EU data residency</div>
+      <h1 class="font-display font-800 text-5xl leading-[1.05] tracking-tight">Turn workforce<br/>data into <span class="grad-text" style="background:linear-gradient(90deg,#a5b4fc,#e879f9,#fda4af);-webkit-background-clip:text">decisions.</span></h1>
+      <p class="text-slate-300 mt-4 max-w-md text-[15px]">Attrition prediction, headcount planning, pay equity, hiring funnel & performance — unified in one real-time dashboard with full CRUD backend.</p>
+      <div class="grid grid-cols-3 gap-4 mt-8 max-w-lg">
+        <div class="bg-white/10 border border-white/10 rounded-2xl p-4 backdrop-blur"><div class="text-2xl font-800 font-display">248</div><div class="text-xs text-slate-300">Active employees</div><div class="text-[11px] text-emerald-300 font-bold mt-1">▲ +12.4% YoY</div></div>
+        <div class="bg-white/10 border border-white/10 rounded-2xl p-4 backdrop-blur"><div class="text-2xl font-800 font-display">13.1%</div><div class="text-xs text-slate-300">Attrition rate</div><div class="text-[11px] text-amber-300 font-bold mt-1">▼ -2.1 pts improved</div></div>
+        <div class="bg-white/10 border border-white/10 rounded-2xl p-4 backdrop-blur"><div class="text-2xl font-800 font-display">7.8</div><div class="text-xs text-slate-300">Engagement /10</div><div class="text-[11px] text-emerald-300 font-bold mt-1">▲ +0.6 this quarter</div></div>
+      </div>
+    </div>
+    <div class="relative flex items-center gap-6 text-xs text-slate-400"><span>● SOC2 Type II</span><span>● GDPR Compliant</span><span>● ISO 27001</span><span class="ml-auto">arcada.app • Frankfurt region</span></div>
+  </div>
+  <div class="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-950">
+    <div class="w-full max-w-md">
+      <div class="lg:hidden flex items-center gap-3 mb-8"><div class="w-10 h-10 rounded-xl grad-bg grid place-items-center text-white font-800">A</div><div class="font-display font-800">Arcada HR Analytics</div></div>
+      <h2 class="font-display text-3xl font-800 tracking-tight">Welcome back</h2><p class="muted text-sm mt-1 mb-6">Sign in to access the People Analytics workspace.</p>
+      <label class="text-xs font-bold uppercase tracking-wider muted">Work email</label>
+      <input id="loginEmail" value="sarah.lindqvist@arcada.app" class="w-full mt-1 mb-4 border border-slate-200 rounded-xl px-4 py-3 text-sm" placeholder="you@company.com"/>
+      <label class="text-xs font-bold uppercase tracking-wider muted">Password</label>
+      <input id="loginPass" type="password" value="demo1234" class="w-full mt-1 mb-4 border border-slate-200 rounded-xl px-4 py-3 text-sm"/>
+      <label class="text-xs font-bold uppercase tracking-wider muted">Role (permissions demo)</label>
+      <select id="loginRole" class="w-full mt-1 mb-5 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"><option>Admin — full access</option><option>Manager — edit, no delete</option><option>Viewer — read only</option></select>
+      <button onclick="doLogin()" class="btn-primary w-full py-3.5 text-[15px]">Sign in to Dashboard →</button>
+      <div class="flex gap-2 mt-3"><button onclick="fillLogin('Admin — full access')" class="chip">Admin</button><button onclick="fillLogin('Manager — edit, no delete')" class="chip">Manager</button><button onclick="fillLogin('Viewer — read only')" class="chip">Viewer</button></div>
+      <div class="mt-6 p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-xs text-indigo-900 leading-relaxed"><b>Backend demo:</b> this build ships with an embedded REST simulator + persistent store (localStorage). Create, edit, delete employees — everything writes through <code>/api/*</code> and is audit-logged. Try <b>Ctrl+K</b> after login.</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden min-h-screen">
+<div class="flex">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="fixed lg:sticky top-0 h-screen w-[248px] shrink-0 bg-slate-950 text-white flex flex-col z-40 transition-all -translate-x-full lg:translate-x-0">
+    <div class="p-5 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl grad-bg grid place-items-center font-display font-800 text-lg shadow-pop">A</div>
+      <div><div class="font-display font-bold leading-tight">Arcada HR</div><div class="text-[10px] tracking-[.2em] text-indigo-300 uppercase">People Analytics</div></div>
+      <button class="lg:hidden ml-auto text-slate-400" onclick="toggleSide()">✕</button>
+    </div>
+    <div class="mx-5 mb-3 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2 text-xs"><span class="pulse-dot"></span><span class="text-slate-300 font-semibold">Backend: <span class="text-emerald-300">Operational</span></span><span id="latency" class="ml-auto text-slate-500 font-mono">42ms</span></div>
+    <nav class="flex-1 overflow-y-auto px-4 space-y-1 pb-4" id="sideNav"></nav>
+    <div class="p-4">
+      <div class="rounded-2xl p-4 grad-bg text-white relative overflow-hidden"><div class="absolute -right-6 -top-6 w-28 h-28 bg-white/15 rounded-full blur-xl"></div><div class="text-sm font-bold">AI Retention Copilot</div><div class="text-xs opacity-80 mt-1">3 high-risk exits preventable this month.</div><button onclick="openAI()" class="mt-3 bg-white text-indigo-700 text-xs font-800 font-bold px-3 py-2 rounded-lg w-full">Ask Copilot →</button></div>
+      <div class="flex items-center gap-3 mt-4 px-1"><div id="userAvatar" class="avatar grad-bg">SL</div><div class="min-w-0"><div id="userName" class="text-sm font-bold truncate">Sarah Lindqvist</div><div id="userRole" class="text-[11px] text-slate-400">Admin</div></div><button onclick="logout()" title="Logout" class="ml-auto text-slate-500 hover:text-white">⎋</button></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 min-w-0">
+    <header class="topbar sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200 px-4 md:px-7 py-3.5">
+      <div class="flex items-center gap-3 flex-wrap">
+        <button class="lg:hidden btn-ghost !px-3" onclick="toggleSide()">☰</button>
+        <div><h1 id="pageTitle" class="font-display font-800 text-xl md:text-2xl tracking-tight">Overview</h1><p id="pageSub" class="muted text-xs">Real-time workforce intelligence • Updated just now</p></div>
+        <div class="flex items-center gap-2 ml-auto flex-wrap">
+          <div class="relative hidden md:block"><input id="globalSearch" oninput="onGlobalSearch(this.value)" placeholder="Search employees, press Ctrl+K…" class="border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm w-[260px] bg-slate-50"/><span class="absolute left-3 top-2.5 text-slate-400">⌕</span></div>
+          <select id="fDept" onchange="setFilter('dept',this.value)" class="globalF"><option value="">All Departments</option></select>
+          <select id="fLoc" onchange="setFilter('loc',this.value)" class="globalF"><option value="">All Locations</option></select>
+          <select id="fRange" onchange="setFilter('range',this.value)" class="globalF"><option value="12M">Last 12 months</option><option value="6M">Last 6 months</option><option value="Q">This quarter</option><option value="YTD">YTD</option></select>
+          <button onclick="toggleTheme()" class="btn-ghost !px-3" title="Theme">◐</button>
+          <button onclick="toggleNotif()" class="btn-ghost !px-3 relative" title="Notifications">🔔<span id="notifDot" class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full grid place-items-center">4</span></button>
+          <button onclick="exportCSV()" class="btn-ghost hidden sm:block">⭳ Export</button>
+          <button onclick="openEmpModal()" id="addBtn" class="btn-primary">+ Add Employee</button>
+        </div>
+      </div>
+      <div id="notifPanel" class="hidden absolute right-4 top-[70px] w-[340px] card p-2 z-50 shadow-pop"></div>
+    </header>
+
+    <main class="p-4 md:p-7 max-w-[1400px] mx-auto space-y-6">
+
+      <!-- OVERVIEW -->
+      <section id="page-overview" class="nav-page active space-y-6">
+        <div id="kpiRow" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-5 xl:col-span-2"><div class="flex items-center justify-between mb-1"><div><h3 class="font-display font-bold">Workforce Growth</h3><p class="muted text-xs">Headcount, hires & exits • <span id="trendRange">last 12 months</span></p></div><div class="flex gap-2"><span class="badge bg-indigo-50 text-indigo-700">● Headcount</span><span class="badge bg-emerald-50 text-emerald-700">● Hires</span><span class="badge bg-rose-50 text-rose-700">● Exits</span></div></div><div class="h-[280px]"><canvas id="cTrend"></canvas></div></div>
+          <div class="card p-5 grad-bg !border-0 text-white relative overflow-hidden"><div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/15 rounded-full blur-2xl"></div><h3 class="font-display font-bold">✦ AI Executive Summary</h3><p class="text-xs opacity-80">Generated from live data • just now</p><div id="aiSummary" class="mt-3 space-y-2.5 text-[13px] leading-relaxed"></div><button onclick="go('attrition')" class="mt-4 bg-white text-indigo-700 font-bold text-xs px-4 py-2.5 rounded-xl w-full">View retention actions →</button></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="card p-5"><h3 class="font-bold text-sm">Attrition by Department</h3><p class="muted text-xs mb-2">Click a bar to filter</p><div class="h-[220px]"><canvas id="cAttrDept"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Gender Diversity</h3><p class="muted text-xs mb-2">Company-wide split</p><div class="h-[220px] flex items-center justify-center"><canvas id="cGender"></canvas></div><div id="genderStats" class="grid grid-cols-3 gap-2 mt-2 text-center"></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Age Distribution</h3><p class="muted text-xs mb-2">Generational mix</p><div class="h-[220px]"><canvas id="cAge"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Performance Mix</h3><p class="muted text-xs mb-2">Last review cycle</p><div class="h-[220px]"><canvas id="cPerf"></canvas></div></div>
+        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-5 xl:col-span-2"><div class="flex items-center justify-between"><h3 class="font-display font-bold">Department Health</h3><button onclick="go('workforce')" class="text-xs font-bold text-indigo-600">View all →</button></div><div class="overflow-x-auto mt-2"><table class="data"><thead><tr><th>Department</th><th>Headcount</th><th>Attrition</th><th>Engagement</th><th>Avg Salary</th><th>Health</th></tr></thead><tbody id="deptTable"></tbody></table></div></div>
+          <div class="card p-5"><div class="flex items-center justify-between"><h3 class="font-display font-bold">🔥 Flight Risk — Top 5</h3><button onclick="go('attrition')" class="text-xs font-bold text-indigo-600">All →</button></div><div id="flightTop" class="mt-3 space-y-3"></div></div>
+        </div>
+      </section>
+
+      <!-- WORKFORCE -->
+      <section id="page-workforce" class="nav-page space-y-6">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4" id="wfKpis"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-5"><h3 class="font-bold text-sm">Headcount by Location</h3><div class="h-[230px]"><canvas id="cLoc"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Tenure Buckets</h3><div class="h-[230px]"><canvas id="cTenure"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Employment Type</h3><div class="h-[230px]"><canvas id="cType"></canvas></div></div>
+        </div>
+        <div class="card p-5">
+          <div class="flex flex-wrap items-center gap-2 mb-3"><h3 class="font-display font-bold text-lg">Employee Directory</h3><span id="empCount" class="badge bg-indigo-50 text-indigo-700"></span>
+            <div class="ml-auto flex gap-2 flex-wrap"><input id="empSearch" oninput="renderTable()" placeholder="Search name, role, ID…" class="border border-slate-200 rounded-xl px-3 py-2 text-sm w-[220px]"/><select id="empDeptF" onchange="renderTable()" class="globalF"><option value="">All depts</option></select><select id="empSort" onchange="renderTable()" class="globalF"><option value="name">Sort: Name</option><option value="salary-desc">Salary ↓</option><option value="risk-desc">Risk ↓</option><option value="tenure-desc">Tenure ↓</option><option value="perf-desc">Performance ↓</option></select></div></div>
+          <div class="overflow-x-auto max-h-[560px] overflow-y-auto rounded-xl border border-slate-100"><table class="data"><thead><tr><th onclick="setSort('name')">Employee ▾</th><th>Department</th><th>Location</th><th>Salary</th><th>Perf.</th><th>Engage</th><th>Risk</th><th>Status</th><th>Actions</th></tr></thead><tbody id="empBody"></tbody></table></div>
+          <div class="flex items-center justify-between mt-3 text-sm"><span id="pageInfo" class="muted"></span><div class="flex gap-2"><button onclick="chPage(-1)" class="btn-ghost !py-1.5">← Prev</button><button onclick="chPage(1)" class="btn-ghost !py-1.5">Next →</button></div></div>
+        </div>
+      </section>
+
+      <!-- ATTRITION -->
+      <section id="page-attrition" class="nav-page space-y-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-5"><h3 class="font-bold text-sm">Turnover Trend</h3><p class="muted text-xs">Voluntary vs involuntary exits</p><div class="h-[240px]"><canvas id="cTurn"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Exit Reasons</h3><div class="h-[240px]"><canvas id="cExit"></canvas></div></div>
+          <div class="card p-6 text-center grad-bg2 !border-0 text-white flex flex-col items-center justify-center"><div class="text-xs font-bold uppercase tracking-widest opacity-80">Predicted attrition — next 90 days</div><div class="relative w-40 h-40 my-3"><svg class="progress-ring w-40 h-40" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="12"/><circle id="riskRing" cx="60" cy="60" r="52" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-dasharray="326" stroke-dashoffset="230"/></svg><div class="absolute inset-0 grid place-items-center"><div><div id="riskPct" class="font-display text-4xl font-800">0%</div><div class="text-xs opacity-80">of workforce</div></div></div></div><div id="riskSub" class="text-sm font-semibold"></div><button onclick="runRetention()" class="mt-3 bg-white/20 border border-white/30 text-white text-xs font-bold px-4 py-2 rounded-xl">▶ Run retention playbook</button></div>
+        </div>
+        <div class="card p-5"><div class="flex items-center gap-3 flex-wrap"><h3 class="font-display font-bold text-lg">Flight-Risk Register</h3><span class="badge bg-rose-50 text-rose-700">ML-scored • nightly</span><div class="ml-auto flex gap-2"><button onclick="filterRisk('all')" class="chip on" data-r="all">All</button><button onclick="filterRisk('High')" class="chip" data-r="High">High</button><button onclick="filterRisk('Medium')" class="chip" data-r="Medium">Medium</button></div></div><div id="riskList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-4"></div></div>
+      </section>
+
+      <!-- PERFORMANCE -->
+      <section id="page-performance" class="nav-page space-y-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-5 xl:col-span-2"><h3 class="font-bold text-sm">9-Box Talent Grid <span class="muted font-normal">— click a box to list talent</span></h3><div id="nineBox" class="grid grid-cols-3 gap-2 mt-3"></div></div>
+          <div class="space-y-4"><div class="card p-5"><h3 class="font-bold text-sm">Goal Completion by Dept</h3><div class="h-[210px]"><canvas id="cGoals"></canvas></div></div><div class="card p-5"><h3 class="font-bold text-sm">Top Performers</h3><div id="topPerf" class="mt-2 space-y-2.5"></div></div></div>
+        </div>
+        <div id="nineList" class="card p-5 hidden"><h3 id="nineTitle" class="font-bold"></h3><div id="nineBody" class="grid md:grid-cols-2 xl:grid-cols-3 gap-3 mt-3"></div></div>
+      </section>
+
+      <!-- RECRUITMENT -->
+      <section id="page-recruitment" class="nav-page space-y-6">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4" id="recKpis"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-5"><h3 class="font-bold text-sm">Hiring Funnel (active)</h3><div class="h-[240px]"><canvas id="cFunnel"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Source Effectiveness</h3><div class="h-[240px]"><canvas id="cSource"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Open Roles</h3><div id="openRoles" class="mt-2 space-y-2.5 max-h-[240px] overflow-y-auto"></div></div>
+        </div>
+        <div class="card p-5"><div class="flex items-center justify-between flex-wrap gap-2"><h3 class="font-display font-bold text-lg">Candidate Pipeline <span class="muted text-xs font-normal">— drag cards between stages (click to advance)</span></h3><button onclick="openCandModal()" class="btn-primary !py-2">+ Add Candidate</button></div><div id="kanban" class="flex gap-3 mt-4 overflow-x-auto pb-2"></div></div>
+      </section>
+
+      <!-- COMPENSATION -->
+      <section id="page-compensation" class="nav-page space-y-6">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4" id="compKpis"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div class="card p-5"><h3 class="font-bold text-sm">Avg Salary by Department (€)</h3><div class="h-[260px]"><canvas id="cSalDept"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-bold text-sm">Gender Pay Gap by Department</h3><p class="muted text-xs">Female vs male avg (negative = gap)</p><div class="h-[260px]"><canvas id="cPayGap"></canvas></div></div>
+        </div>
+        <div class="card p-5"><h3 class="font-bold text-sm">Salary Distribution</h3><div class="h-[220px]"><canvas id="cSalDist"></canvas></div></div>
+      </section>
+
+      <!-- REPORTS -->
+      <section id="page-reports" class="nav-page space-y-6">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="card p-6"><h3 class="font-display font-bold text-lg">Report Builder</h3><p class="muted text-xs mb-4">Select metrics → preview → export</p>
+            <div class="space-y-2 text-sm font-semibold" id="repOpts"></div>
+            <label class="text-xs font-bold uppercase tracking-wider muted mt-4 block">Format</label>
+            <div class="flex gap-2 mt-1"><button class="chip on" onclick="setRepFmt(this,'PDF')">PDF</button><button class="chip" onclick="setRepFmt(this,'CSV')">CSV</button><button class="chip" onclick="setRepFmt(this,'XLSX')">XLSX</button></div>
+            <button onclick="buildReport()" class="btn-primary w-full mt-5">Generate Report</button>
+            <button onclick="exportCSV()" class="btn-ghost w-full mt-2">⭳ Quick export directory (CSV)</button>
+          </div>
+          <div class="card p-6 xl:col-span-2" id="repPreview"><div class="text-center py-14 muted"><div class="text-5xl mb-3">📊</div><b>Choose metrics</b> on the left and hit Generate.<br/>Preview renders here with live numbers.</div></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS / BACKEND -->
+      <section id="page-settings" class="nav-page space-y-6">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div class="card p-6"><h3 class="font-display font-bold text-lg">⚙ Backend API Explorer</h3><p class="muted text-xs">Embedded REST simulator • base <code>https://api.arcada.app/v1</code> • <span class="text-emerald-600 font-bold">● connected</span></p>
+            <div id="apiList" class="mt-4 space-y-2"></div>
+            <div class="mt-3 rounded-xl bg-slate-950 text-emerald-300 font-mono text-xs p-4 max-h-[220px] overflow-y-auto" id="apiOut">// Select an endpoint and press TRY to execute against the live store…</div>
+          </div>
+          <div class="space-y-4">
+            <div class="card p-6"><h3 class="font-display font-bold">Data Management</h3><div class="grid grid-cols-2 gap-2 mt-3 text-sm"><div class="p-3 rounded-xl bg-slate-50 border"><div class="muted text-xs">Records</div><div id="dbSize" class="font-800 font-display text-xl">—</div></div><div class="p-3 rounded-xl bg-slate-50 border"><div class="muted text-xs">Storage used</div><div id="dbKB" class="font-800 font-display text-xl">—</div></div></div><div class="flex flex-wrap gap-2 mt-3"><button onclick="exportJSON()" class="btn-ghost">⭳ Backup JSON</button><label class="btn-ghost cursor-pointer">⭱ Restore <input type="file" id="importFile" class="hidden" accept=".json" onchange="importJSON(event)"/></label><button onclick="seed(true)" class="btn-ghost !border-rose-200 !text-rose-600">↺ Reset demo data</button><button onclick="toggleLive()" id="liveBtn" class="btn-ghost !border-emerald-200 !text-emerald-700">● Live sync: ON</button></div></div>
+            <div class="card p-6"><div class="flex items-center justify-between"><h3 class="font-display font-bold">Audit Log</h3><button onclick="clearLog()" class="text-xs font-bold text-slate-400">Clear</button></div><div id="auditLog" class="mt-3 space-y-2 max-h-[260px] overflow-y-auto text-xs"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="text-center muted text-xs pb-8">Arcada People Analytics • Frontend + embedded backend • Data persisted locally • <span class="font-bold">Demo build — no real PII</span></footer>
+    </main>
+  </div>
+</div>
+</div>
+
+<!-- EMP MODAL -->
+<div id="empModal" class="hidden fixed inset-0 z-[90] modal-bg grid place-items-center p-4"><div class="card !rounded-2xl w-full max-w-2xl p-6 max-h-[92vh] overflow-y-auto fadein">
+  <div class="flex items-center justify-between"><h3 id="empModalTitle" class="font-display font-800 text-xl">Add Employee</h3><button onclick="closeEmpModal()" class="text-2xl text-slate-400">×</button></div>
+  <div class="grid md:grid-cols-2 gap-3 mt-4 text-sm">
+    <div><label class="text-xs font-bold muted">First name *</label><input id="eFirst" class="w-full border rounded-xl px-3 py-2.5 mt-1"/></div>
+    <div><label class="text-xs font-bold muted">Last name *</label><input id="eLast" class="w-full border rounded-xl px-3 py-2.5 mt-1"/></div>
+    <div><label class="text-xs font-bold muted">Department</label><select id="eDept" class="w-full border rounded-xl px-3 py-2.5 mt-1"></select></div>
+    <div><label class="text-xs font-bold muted">Role</label><input id="eRole" placeholder="e.g. Senior Engineer" class="w-full border rounded-xl px-3 py-2.5 mt-1"/></div>
+    <div><label class="text-xs font-bold muted">Location</label><select id="eLoc" class="w-full border rounded-xl px-3 py-2.5 mt-1"></select></div>
+    <div><label class="text-xs font-bold muted">Level</label><select id="eLevel" class="w-full border rounded-xl px-3 py-2.5 mt-1"><option>Junior</option><option selected>Mid</option><option>Senior</option><option>Lead</option><option>Manager</option><option>Director</option></select></div>
+    <div><label class="text-xs font-bold muted">Gender</label><select id="eGender" class="w-full border rounded-xl px-3 py-2.5 mt-1"><option>Female</option><option>Male</option><option>Non-binary</option></select></div>
+    <div><label class="text-xs font-bold muted">Age</label><input id="eAge" type="number" value="30" class="w-full border rounded-xl px-3 py-2.5 mt-1"/></div>
+    <div><label class="text-xs font-bold muted">Annual salary (€)</label><input id="eSalary" type="number" value="65000" class="w-full border rounded-xl px-3 py-2.5 mt-1"/></div>
+    <div><label class="text-xs font-bold muted">Performance (1-5)</label><select id="ePerf" class="w-full border rounded-xl px-3 py-2.5 mt-1"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>1</option></select></div>
+    <div><label class="text-xs font-bold muted">Engagement (1-10)</label><input id="eEng" type="number" min="1" max="10" value="7" class="w-full border rounded-xl px-3 py-2.5 mt-1"/></div>
+    <div><label class="text-xs font-bold muted">Employment type</label><select id="eType" class="w-full border rounded-xl px-3 py-2.5 mt-1"><option>Full-time</option><option>Part-time</option><option>Contract</option></select></div>
+  </div>
+  <div class="flex gap-2 mt-5"><button onclick="closeEmpModal()" class="btn-ghost flex-1">Cancel</button><button onclick="saveEmployee()" class="btn-primary flex-1">💾 Save via POST /api/employees</button></div>
+</div></div>
+
+<!-- DETAIL DRAWER -->
+<div id="drawer" class="hidden fixed inset-0 z-[85]"><div class="absolute inset-0 modal-bg" onclick="closeDrawer()"></div><div class="absolute right-0 top-0 h-full w-full max-w-[440px] bg-white dark:bg-slate-900 shadow-2xl overflow-y-auto p-6 fadein" id="drawerBody"></div></div>
+
+<!-- CAND MODAL -->
+<div id="candModal" class="hidden fixed inset-0 z-[90] modal-bg grid place-items-center p-4"><div class="card w-full max-w-md p-6 fadein"><div class="flex justify-between items-center"><h3 class="font-display font-800 text-lg">Add Candidate</h3><button onclick="document.getElementById('candModal').classList.add('hidden')" class="text-2xl text-slate-400">×</button></div><input id="cName" placeholder="Full name" class="w-full border rounded-xl px-3 py-2.5 mt-3 text-sm"/><input id="cRole" placeholder="Applied role" class="w-full border rounded-xl px-3 py-2.5 mt-2 text-sm"/><select id="cStage" class="w-full border rounded-xl px-3 py-2.5 mt-2 text-sm"><option>Applied</option><option>Screening</option><option>Interview</option><option>Offer</option></select><button onclick="saveCandidate()" class="btn-primary w-full mt-4">Add to pipeline</button></div></div>
+
+<!-- CMD+K -->
+<div id="cmdK" class="hidden fixed inset-0 z-[95] modal-bg p-4"><div class="max-w-xl mx-auto mt-24 card overflow-hidden fadein"><div class="flex items-center gap-2 p-4 border-b"><span>⌕</span><input id="cmdInput" oninput="renderCmd(this.value)" placeholder="Type a command or search employees…" class="flex-1 outline-none text-sm bg-transparent"/><kbd>ESC</kbd></div><div id="cmdList" class="max-h-[320px] overflow-y-auto p-2"></div></div></div>
+
+<!-- AI -->
+<button onclick="openAI()" class="fixed bottom-6 right-6 z-[80] w-14 h-14 rounded-full grad-bg text-white text-2xl shadow-pop hover:scale-105 transition">✦</button>
+<div id="aiPanel" class="hidden fixed bottom-24 right-6 z-[80] w-[360px] max-w-[92vw] card overflow-hidden shadow-pop fadein"><div class="grad-bg text-white p-4"><div class="font-display font-bold">✦ Retention Copilot</div><div class="text-xs opacity-80">Ask anything about your workforce</div></div><div id="aiChat" class="p-4 space-y-3 max-h-[320px] overflow-y-auto"><div class="ai-msg">Hi! I'm trained on your live HR data. Try: <b>"Why is Sales attrition high?"</b> or <b>"Pay gap summary"</b></div></div><div class="p-3 border-t flex gap-2"><input id="aiInput" onkeydown="if(event.key==='Enter')askAI()" placeholder="Ask about attrition, pay, hiring…" class="flex-1 border rounded-xl px-3 py-2 text-sm"/><button onclick="askAI()" class="btn-primary !px-4">➤</button></div></div>
+
+<div id="toasts" class="fixed bottom-6 left-6 z-[99] space-y-2 w-[320px]"></div>
+
+<script>
+/* ============ UTIL + SEEDED RNG ============ */
+let _s=42; function rnd(){_s=(_s*9301+49297)%233280;return _s/233280}
+function pick(a){return a[Math.floor(rnd()*a.length)]}
+function ri(a,b){return Math.floor(rnd()*(b-a+1))+a}
+function fmt(n){return n>=1000?(n/1000).toFixed(1).replace('.0','')+'k':n}
+function eur(n){return '€'+Math.round(n).toLocaleString('de-DE')}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toast(msg,type='ok'){const t=document.createElement('div');const c=type==='ok'?'border-emerald-200':type==='warn'?'border-amber-200':'border-rose-200';const d=type==='ok'?'bg-emerald-500':type==='warn'?'bg-amber-500':'bg-rose-500';t.className=`toast card p-3.5 flex gap-3 items-start border ${c}`;t.innerHTML=`<div class="w-8 h-8 rounded-lg ${d} text-white grid place-items-center font-bold shrink-0">${type==='ok'?'✓':type==='warn'?'!':'×'}</div><div class="text-[13px] font-semibold leading-snug">${msg}</div>`;document.getElementById('toasts').appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='.4s';setTimeout(()=>t.remove(),400)},3400)}
+Chart.defaults.font.family='Inter';Chart.defaults.color='#64748b';
+let charts={};function mk(id,cfg){if(charts[id])charts[id].destroy();const el=document.getElementById(id);if(!el)return;charts[id]=new Chart(el,cfg)}
+
+/* ============ DOMAIN DATA ============ */
+const DEPTS=['Engineering','Sales','Product','Marketing','Finance','Operations','HR','Support','Data Science','Legal'];
+const LOCS=['Berlin','Munich','Hamburg','Amsterdam','Vienna','Remote'];
+const ROLES={'Engineering':['Backend Engineer','Frontend Engineer','DevOps Engineer','QA Engineer','Engineering Manager'],'Sales':['Account Executive','SDR','Key Account Manager','Sales Manager'],'Product':['Product Manager','UX Designer','Product Analyst'],'Marketing':['Growth Marketer','Content Strategist','SEO Specialist','Brand Manager'],'Finance':['Financial Analyst','Controller','Accountant'],'Operations':['Ops Manager','Office Manager','Logistics Lead'],'HR':['HR Business Partner','Recruiter','People Ops'],'Support':['Support Agent','Support Lead','Success Manager'],'Data Science':['Data Scientist','ML Engineer','Analytics Engineer'],'Legal':['Legal Counsel','Compliance Officer']};
+const FIRST=['Jonas','Mila','Liam','Sofia','Felix','Emma','Noah','Lena','Paul','Marie','Luca','Anna','Leon','Clara','David','Johanna','Max','Laura','Elias','Nina','Finn','Hannah','Ben','Lisa','Tom','Aylin','Mehmet','Priya','Chen','Yuki','Omar','Zara','Lucas','Mia','Erik','Freya','Hugo','Ida','Karl','Greta'];
+const LAST=['Weber','Müller','Schmidt','Schneider','Fischer','Meyer','Wagner','Becker','Schulz','Hoffmann','Koch','Bauer','Richter','Klein','Wolf','Schröder','Neumann','Braun','Krüger','Lindqvist','Novak','Silva','Khan','Yilmaz','Conti','Dubois','Nielsen','Virtanen','Kovac','Moreau'];
+const AV_GRADS=[['#6366f1','#a855f7'],['#06b6d4','#6366f1'],['#f59e0b','#ef4444'],['#10b981','#06b6d4'],['#ec4899','#8b5cf6'],['#14b8a6','#84cc16']];
+const EXIT_REASONS=['Better compensation','Career growth','Work-life balance','Relocation','Management issues','Company culture'];
+let DB={employees:[],candidates:[],audit:[]};
+let session={name:'Sarah Lindqvist',role:'Admin'};
+let filters={dept:'',loc:'',range:'12M',risk:'all'};
+let page=1, perPage=10, tableSort='name', nineSel=null, repFmt='PDF', liveOn=true;
+
+function salaryFor(dept,level){const base={'Engineering':72000,'Data Science':74000,'Product':68000,'Sales':60000,'Marketing':56000,'Finance':62000,'Legal':70000,'Operations':52000,'HR':54000,'Support':48000}[dept]||55000;const mult={'Junior':.75,'Mid':1,'Senior':1.3,'Lead':1.55,'Manager':1.7,'Director':2.2}[level]||1;return Math.round(base*mult*(0.92+rnd()*0.22)/500)*500}
+function calcRisk(e){let r=8+(10-e.engagement)*5.5;const ten=(Date.now()-new Date(e.hireDate))/3.154e10;if(ten<1)r+=16;else if(ten<2)r+=9;if(e.lastPromo>3)r+=11;if(e.overtime==='High')r+=10;else if(e.overtime==='Medium')r+=4;const mkt=salaryFor(e.dept,e.level);if(e.salary<mkt*0.92)r+=12;if(e.performance>=4)r-=6;if(e.sat<5)r+=7;r+=rnd()*7;return Math.max(4,Math.min(97,Math.round(r)))}
+function riskCat(r){return r>=68?'High':r>=42?'Medium':'Low'}
+
+function seed(reset=false){
+  try{if(!reset){const raw=localStorage.getItem('arcada_db_v2');if(raw){DB=JSON.parse(raw);afterLoad();return}}}catch(e){}
+  _s=20261010;DB.employees=[];DB.candidates=[];DB.audit=[];
+  let id=1001;
+  const totalActive=248, leavers=37;
+  for(let i=0;i<totalActive+leavers;i++){
+    const dept=pick(DEPTS);const level=pick(['Junior','Junior','Mid','Mid','Mid','Senior','Senior','Lead','Manager','Director']);
+    const genderR=rnd();const gender=genderR<0.44?'Female':genderR<0.88?'Male':'Non-binary';
+    const age=ri(22,60);const hireY=ri(2015,2026),hireM=ri(0,11),hireD=ri(1,28);
+    const exited=i>=totalActive;
+    const e={id:'EMP-'+(id++),first:pick(FIRST),last:pick(LAST),dept,role:pick(ROLES[dept]),level,loc:pick(LOCS),gender,age,
+      hireDate:`${hireY}-${String(hireM+1).padStart(2,'0')}-${String(hireD).padStart(2,'0')}`,
+      salary:salaryFor(dept,level),performance:pick([2,3,3,3,3,4,4,4,5,5,1]),
+      engagement:ri(3,10),sat:ri(3,10),overtime:pick(['Low','Low','Low','Medium','Medium','High']),
+      lastPromo:ri(0,5),type:rnd()<0.84?'Full-time':rnd()<0.6?'Part-time':'Contract',
+      status:exited?'Exited':rnd()<0.94?'Active':'On Leave',
+      exitDate:exited?`2026-${String(ri(1,9)).padStart(2,'0')}-${String(ri(1,28)).padStart(2,'0')}`:null,
+      exitReason:exited?pick(EXIT_REASONS):null,voluntary:exited?rnd()<0.75:true,
+      potential:ri(3,10),goals:ri(45,100),training:ri(20,100)};
+    e.email=(e.first+'.'+e.last+'@arcada.app').toLowerCase();
+    e.risk=calcRisk(e);
+    DB.employees.push(e);
+  }
+  const stages=['Applied','Screening','Interview','Offer'];const cn=['Jonas Park','Aisha Bello','Marco Rossi','Elena Petrova','Sam Carter','Lena Fischer','Omar Haddad','Julia Kim','Tom Becker','Nora Ali','Chris Evans','Mia Wolf','Dan Levy','Sara Novak','Leo Messi','Ana Ruiz','Ben Koch','Eva Braun','Max Power','Ivy Chen'];
+  cn.forEach((n,i)=>{DB.candidates.push({id:'CAND-'+(200+i),name:n,role:pick(['Backend Engineer','Product Manager','Account Executive','Data Scientist','UX Designer','Support Agent']),stage:stages[Math.min(3,Math.floor(i/6))],source:pick(['LinkedIn','Referral','Indeed','Website','Agency']),score:ri(62,98),avatar:pick(AV_GRADS)})});
+  DB.audit=[{ts:Date.now()-86400000*2,user:'system',action:'SEED',details:'Demo dataset generated (285 employees, 20 candidates)'}];
+  persist();afterLoad();
+}
+function persist(){try{localStorage.setItem('arcada_db_v2',JSON.stringify(DB))}catch(e){}}
+function afterLoad(){DB.employees.forEach(e=>{if(e.risk==null)e.risk=calcRisk(e)})}
+
+/* ============ BACKEND SIM (REST) ============ */
+function apiLog(method,path,details){DB.audit.unshift({ts:Date.now(),user:session.name,action:`${method} ${path}`,details});persist();renderAudit()}
+function apiDelay(){return new Promise(r=>setTimeout(r,180+rnd()*320))}
+async function API_listEmployees(){await apiDelay();return DB.employees.filter(e=>e.status!=='Exited')}
+async function API_createEmployee(payload){await apiDelay();if(session.role==='Viewer')throw new Error('403 — Viewers cannot create records');const e={id:'EMP-'+(1100+DB.employees.length+ri(1,90)),...payload,status:'Active',hireDate:new Date().toISOString().slice(0,10),lastPromo:0,type:payload.type||'Full-time',potential:ri(4,9),goals:ri(50,95),training:ri(30,90),sat:payload.engagement||7,overtime:'Low'};e.email=(e.first+'.'+e.last+'@arcada.app').toLowerCase().replace(/ /g,'');e.risk=calcRisk(e);DB.employees.push(e);apiLog('POST','/api/employees',`Created ${e.first} ${e.last} (${e.id})`);persist();return e}
+async function API_updateEmployee(id,patch){await apiDelay();if(session.role==='Viewer')throw new Error('403 — read-only role');const e=DB.employees.find(x=>x.id===id);Object.assign(e,patch);e.risk=calcRisk(e);apiLog('PUT',`/api/employees/${id}`,`Updated ${Object.keys(patch).join(', ')}`);persist();return e}
+async function API_deleteEmployee(id){await apiDelay();if(session.role!=='Admin')throw new Error('403 — only Admins can delete');const i=DB.employees.findIndex(x=>x.id===id);const[e]=DB.employees.splice(i,1);apiLog('DELETE',`/api/employees/${id}`,`Removed ${e.first} ${e.last}`);persist();return e}
+
+/* ============ FILTERS / AGG ============ */
+function activeEmps(){return DB.employees.filter(e=>e.status!=='Exited')}
+function filtered(){return activeEmps().filter(e=>(!filters.dept||e.dept===filters.dept)&&(!filters.loc||e.loc===filters.loc))}
+function leavers(){return DB.employees.filter(e=>e.status==='Exited')}
+function avg(a){return a.length?a.reduce((s,v)=>s+v,0)/a.length:0}
+function tenureY(e){return (Date.now()-new Date(e.hireDate))/3.154e10}
+
+/* ============ NAV ============ */
+const PAGES=[['overview','Overview','M3 12l9-9 9 9M3 12h18'],['workforce','Workforce','M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-8 0 4 4 0 008 0zm6-5a3 3 0 11-6 0 3 3 0 016 0z'],['attrition','Attrition','M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6'],['performance','Performance','M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118L2.075 9.1c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'],['recruitment','Recruitment','M21 13V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6m18 0a2 2 0 01-2 2H5a2 2 0 01-2-2m18 0v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6m15-9h-9v4h9V4z'],['compensation','Compensation','M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],['reports','Reports','M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],['settings','Backend & Settings','M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z']];
+function buildNav(){document.getElementById('sideNav').innerHTML=PAGES.map(([id,label,path])=>`<div class="side-link ${id==='overview'?'active':''}" onclick="go('${id}')"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${path}"/></svg>${label}${id==='attrition'?'<span class="ml-auto text-[10px] bg-rose-500 text-white font-bold px-1.5 py-0.5 rounded-md">12</span>':''}${id==='settings'?'<span class="ml-auto w-2 h-2 rounded-full bg-emerald-400"></span>':''}</div>`).join('')}
+const TITLES={overview:['Overview','Real-time workforce intelligence • Updated just now'],workforce:['Workforce','Headcount, directory & movement'],attrition:['Attrition & Retention','Predict, prevent & act on flight risk'],performance:['Talent & Performance','Reviews, goals & 9-box succession'],recruitment:['Recruitment','Pipeline, funnel & time-to-hire'],compensation:['Compensation','Pay equity, bands & compa-ratio'],reports:['Reports','Build & export board-ready reports'],settings:['Backend & Settings','API explorer, audit log & data controls']};
+function go(id){document.querySelectorAll('.nav-page').forEach(s=>s.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');document.querySelectorAll('.side-link').forEach((el,i)=>el.classList.toggle('active',PAGES[i][0]===id));document.getElementById('pageTitle').textContent=TITLES[id][0];document.getElementById('pageSub').textContent=TITLES[id][1];document.getElementById('sidebar').classList.add('-translate-x-full');window.scrollTo({top:0,behavior:'smooth'});setTimeout(renderAll,30)}
+
+/* ============ RENDER: KPIs + CHARTS ============ */
+function spark(id,data,color){mk(id,{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:2,pointRadius:0,tension:.45,fill:true,backgroundColor:color+'22'}]},options:{plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}},animation:{duration:800},maintainAspectRatio:false}})}
+function kpiCard(icon,label,value,sub,trend,sparkId,sparkData,color){return `<div class="card p-5 relative overflow-hidden group hover:shadow-pop transition"><div class="flex items-start justify-between"><div class="kpi-icon" style="background:linear-gradient(135deg,${color[0]},${color[1]})">${icon}</div><span class="badge ${trend.startsWith('▲')||trend.startsWith('+')||trend.includes('good')?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700'}">${trend.replace('good ','')}</span></div><div class="mt-3 font-display text-3xl font-800 tracking-tight counter" data-v="${value}">${value}</div><div class="text-sm font-bold">${label}</div><div class="muted text-xs">${sub}</div><div class="h-[44px] mt-2"><canvas id="${sparkId}"></canvas></div></div>`}
+function animateCounters(){document.querySelectorAll('.counter').forEach(el=>{const raw=el.dataset.v;const num=parseFloat(raw);if(isNaN(num))return;const dec=raw.includes('.')?1:0;const suf=raw.replace(/[\d.\-]/g,'');let cur=0;const step=num/40;const iv=setInterval(()=>{cur+=step;if(cur>=num){cur=num;clearInterval(iv)}el.textContent=cur.toFixed(dec)+suf},20)})}
+
+function monthlySeries(){const months=['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];let head=226;const hires=[9,7,12,8,14,11,9,13,10,12,15,11],exits=[4,3,5,2,6,3,4,5,3,4,5,3];const hc=hires.map((h,i)=>head+=h-exits[i]);return{months,hires,exits,hc}}
+function renderOverview(){
+  const F=filtered(), act=F.length, leav=leavers().length;
+  const attr=(leav/(act+leav)*100);
+  const eng=avg(F.map(e=>e.engagement)), ten=avg(F.map(e=>tenureY(e)));
+  const fem=F.filter(e=>e.gender==='Female').length/F.length*100;
+  document.getElementById('kpiRow').innerHTML=
+    kpiCard('◈','Total Headcount',act,'▲ +18 vs last quarter','▲ +7.8%','sp1',[220,226,231,229,238,240,236,244,241,247,244,act],'#6366f1,#a855f7')+
+    kpiCard('◉','Attrition Rate',attr.toFixed(1)+'%','37 exits • voluntary 76%','▼ -2.1 pts good','sp2',[16,15.4,15,14.6,14.2,13.8,13.5,13.2,13.1,13,13.1,attr],'#f43f5e,#fb923c')+
+    kpiCard('✦','Avg Engagement',eng.toFixed(1)+'','eNPS +34 • participation 91%','▲ +0.6','sp3',[6.8,7,7.1,6.9,7.2,7.4,7.3,7.5,7.6,7.7,7.8,eng],'#10b981,#06b6d4')+
+    kpiCard('⬣','Avg Tenure',ten.toFixed(1)+'y','Median 2.8y • 5y+ veterans 18%','▲ +0.3y','sp4',[2.6,2.7,2.8,2.9,2.8,3,3.1,3,3.2,3.3,3.4,ten],'#f59e0b,#ec4899');
+  ['sp1','sp2','sp3','sp4'].forEach((id,i)=>spark(id,[220,226,231,229,238,240,236,244,241,247,244,act].slice(i,12),['#6366f1','#f43f5e','#10b981','#f59e0b'][i]));
+  animateCounters();
+  const ms=monthlySeries();
+  mk('cTrend',{type:'line',data:{labels:ms.months,datasets:[{label:'Headcount',data:ms.hc,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.15)',fill:true,tension:.45,borderWidth:3},{label:'Hires',data:ms.hires,borderColor:'#10b981',tension:.4,borderWidth:2,pointRadius:3},{label:'Exits',data:ms.exits,borderColor:'#f43f5e',borderDash:[5,4],tension:.4,borderWidth:2,pointRadius:3}]},options:{plugins:{legend:{display:false}},scales:{y:{grid:{color:'#f1f5f9'}}},maintainAspectRatio:false}});
+  const byDept=DEPTS.map(d=>{const tot=DB.employees.filter(e=>e.dept===d).length;const ex=DB.employees.filter(e=>e.dept===d&&e.status==='Exited').length;return{d,v:tot?ex/tot*100:0}});
+  mk('cAttrDept',{type:'bar',data:{labels:byDept.map(x=>x.d),datasets:[{data:byDept.map(x=>+x.v.toFixed(1)),backgroundColor:byDept.map(x=>x.v>16?'#f43f5e':x.v>12?'#fb923c':'#6366f1'),borderRadius:8}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+'% attrition'}}},scales:{x:{max:25}},maintainAspectRatio:false,onClick:(e,els)=>{if(els.length){filters.dept=byDept[els[0].index].d;document.getElementById('fDept').value=filters.dept;renderAll();toast(`Filtered to <b>${filters.dept}</b> — click again in filter to clear`)}}}});
+  const gF=F.filter(e=>e.gender==='Female').length,gM=F.filter(e=>e.gender==='Male').length,gN=F.length-gF-gM;
+  mk('cGender',{type:'doughnut',data:{labels:['Female','Male','Non-binary'],datasets:[{data:[gF,gM,gN],backgroundColor:['#a855f7','#6366f1','#22d3ee'],borderWidth:3,borderColor:'#fff'}]},options:{cutout:'62%',plugins:{legend:{display:false}},maintainAspectRatio:false}});
+  document.getElementById('genderStats').innerHTML=[['Female',gF,'#a855f7'],['Male',gM,'#6366f1'],['NB',gN,'#22d3ee']].map(([l,v,c])=>`<div class="rounded-xl bg-slate-50 border p-2"><div class="font-800 font-display" style="color:${c}">${Math.round(v/F.length*100)}%</div><div class="text-[10px] muted font-bold">${l}</div></div>`).join('');
+  const ages=[F.filter(e=>e.age<26).length,F.filter(e=>e.age>=26&&e.age<35).length,F.filter(e=>e.age>=35&&e.age<45).length,F.filter(e=>e.age>=45&&e.age<55).length,F.filter(e=>e.age>=55).length];
+  mk('cAge',{type:'bar',data:{labels:['<26','26-34','35-44','45-54','55+'],datasets:[{data:ages,backgroundColor:['#22d3ee','#6366f1','#a855f7','#ec4899','#f59e0b'],borderRadius:10}]},options:{plugins:{legend:{display:false}},maintainAspectRatio:false}});
+  const perf=[1,2,3,4,5].map(p=>F.filter(e=>e.performance===p).length);
+  mk('cPerf',{type:'bar',data:{labels:['★1','★2','★3','★4','★5'],datasets:[{data:perf,backgroundColor:['#f43f5e','#fb923c','#eab308','#10b981','#6366f1'],borderRadius:10}]},options:{plugins:{legend:{display:false}},maintainAspectRatio:false}});
+  // dept table
+  document.getElementById('deptTable').innerHTML=DEPTS.map(d=>{const rows=F.filter(e=>e.dept===d);if(!rows.length)return'';const tot=DB.employees.filter(e=>e.dept===d).length,ex=DB.employees.filter(e=>e.dept===d&&e.status==='Exited').length;const a=tot?ex/tot*100:0;const en=avg(rows.map(e=>e.engagement));const sal=avg(rows.map(e=>e.salary));const h=a<12?'Excellent':a<16?'Watch':'At risk';const hc=a<12?'bg-emerald-50 text-emerald-700':a<16?'bg-amber-50 text-amber-700':'bg-rose-50 text-rose-700';return `<tr><td><b>${d}</b><div class="muted text-[11px]">${rows[0]?.role||''} +${rows.length-1} roles</div></td><td class="font-bold">${rows.length}</td><td class="font-bold ${a>15?'text-rose-600':''}">${a.toFixed(1)}%</td><td><div class="flex items-center gap-2"><div class="risk-bar w-16"><div class="risk-fill" style="width:${en*10}%;background:${en>7?'#10b981':en>6?'#f59e0b':'#f43f5e'}"></div></div><b>${en.toFixed(1)}</b></div></td><td>${eur(sal)}</td><td><span class="badge ${hc}">${h}</span></td></tr>`}).join('');
+  // flight top
+  const top=[...F].sort((a,b)=>b.risk-a.risk).slice(0,5);
+  document.getElementById('flightTop').innerHTML=top.map(e=>{const g=AV_GRADS[e.first.length%6];return `<div class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/50 transition cursor-pointer" onclick="openDrawer('${e.id}')"><div class="avatar" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${e.first[0]}${e.last[0]}</div><div class="min-w-0 flex-1"><div class="text-[13px] font-bold truncate">${esc(e.first)} ${esc(e.last)}</div><div class="muted text-[11px]">${esc(e.role)} • ${e.dept}</div></div><div class="text-right"><div class="text-sm font-800 font-display ${e.risk>=68?'text-rose-600':'text-amber-600'}">${e.risk}%</div><div class="text-[10px] muted font-bold">${riskCat(e.risk).toUpperCase()}</div></div></div>`}).join('');
+  // AI summary
+  const worst=[...byDept].sort((a,b)=>b.v-a.v)[0];
+  document.getElementById('aiSummary').innerHTML=[`Workforce is <b>growing (+${act-226} YoY)</b> with engagement at <b>${eng.toFixed(1)}/10</b> — top quartile for tech.`,`<b>${worst.d}</b> shows highest attrition (<b>${worst.v.toFixed(1)}%</b>), driven by compensation & manager load.`,`<b>${F.filter(e=>e.risk>=68).length} employees</b> flagged high flight-risk. Retaining top 5 saves ≈ <b>${eur(F.filter(e=>e.risk>=68).slice(0,5).reduce((s,e)=>s+e.salary*0.6,0))}</b> in replacement cost.`,`Pay gap is <b>${payGap().toFixed(1)}%</b> (F/M). Recommend band review in ${worst.d}.`].map(t=>`<div class="flex gap-2"><span>▸</span><span>${t}</span></div>`).join('');
+}
+function payGap(){const F=filtered();const m=avg(F.filter(e=>e.gender==='Male').map(e=>e.salary)),f=avg(F.filter(e=>e.gender==='Female').map(e=>e.salary));return m?(f-m)/m*100:0}
+
+/* ============ WORKFORCE ============ */
+function setSort(k){tableSort=k;renderTable()}
+function chPage(d){page+=d;if(page<1)page=1;renderTable()}
+function renderWorkforce(){
+  const F=filtered();
+  document.getElementById('wfKpis').innerHTML=[['Active HC',F.length,'▲ hiring pace strong',''],['On Leave',DB.employees.filter(e=>e.status==='On Leave').length,'3 returning soon',''],['Open Roles','14','6 in Engineering',''],['eNPS','+34','▲ promoter 58%','']].map(([l,v,s])=>`<div class="card p-4"><div class="muted text-xs font-bold uppercase tracking-wider">${l}</div><div class="font-display text-2xl font-800 mt-1">${v}</div><div class="text-xs text-emerald-600 font-bold mt-1">${s}</div></div>`).join('');
+  const byLoc=LOCS.map(l=>F.filter(e=>e.loc===l).length);
+  mk('cLoc',{type:'doughnut',data:{labels:LOCS,datasets:[{data:byLoc,backgroundColor:['#6366f1','#a855f7','#ec4899','#06b6d4','#10b981','#f59e0b'],borderWidth:3,borderColor:'#fff'}]},options:{cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},maintainAspectRatio:false}});
+  const tb=[F.filter(e=>tenureY(e)<1).length,F.filter(e=>{const t=tenureY(e);return t>=1&&t<3}).length,F.filter(e=>{const t=tenureY(e);return t>=3&&t<5}).length,F.filter(e=>tenureY(e)>=5).length];
+  mk('cTenure',{type:'bar',data:{labels:['<1y','1-3y','3-5y','5y+'],datasets:[{data:tb,backgroundColor:'#6366f1',borderRadius:10}]},options:{plugins:{legend:{display:false}},maintainAspectRatio:false}});
+  const ty=['Full-time','Part-time','Contract'].map(t=>F.filter(e=>e.type===t).length);
+  mk('cType',{type:'pie',data:{labels:['Full-time','Part-time','Contract'],datasets:[{data:ty,backgroundColor:['#4f46e5','#22d3ee','#f59e0b'],borderWidth:3,borderColor:'#fff'}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},maintainAspectRatio:false}});
+  const ds=document.getElementById('empDeptF');if(ds.options.length<=1)ds.innerHTML='<option value="">All depts</option>'+DEPTS.map(d=>`<option>${d}</option>`).join('');
+  renderTable();
+}
+function renderTable(){
+  const q=(document.getElementById('empSearch')?.value||'').toLowerCase();
+  const df=document.getElementById('empDeptF')?.value||'';
+  let rows=filtered().filter(e=>(!df||e.dept===df)&&(!q||(e.first+' '+e.last+' '+e.role+' '+e.id).toLowerCase().includes(q)));
+  if(tableSort==='salary-desc')rows.sort((a,b)=>b.salary-a.salary);else if(tableSort==='risk-desc')rows.sort((a,b)=>b.risk-a.risk);else if(tableSort==='tenure-desc')rows.sort((a,b)=>tenureY(b)-tenureY(a));else if(tableSort==='perf-desc')rows.sort((a,b)=>b.performance-a.performance);else rows.sort((a,b)=>(a.first+a.last).localeCompare(b.first+b.last));
+  document.getElementById('empCount').textContent=rows.length+' records • GET /api/employees 200 OK';
+  const pages=Math.max(1,Math.ceil(rows.length/perPage));if(page>pages)page=pages;
+  const slice=rows.slice((page-1)*perPage,page*perPage);
+  document.getElementById('pageInfo').textContent=`Page ${page} of ${pages} • ${rows.length} employees`;
+  document.getElementById('empBody').innerHTML=slice.map(e=>{const g=AV_GRADS[(e.first.length+e.last.length)%6];const rc=riskCat(e.risk);const rcb=rc==='High'?'bg-rose-50 text-rose-700':rc==='Medium'?'bg-amber-50 text-amber-700':'bg-emerald-50 text-emerald-700';return `<tr><td><div class="flex items-center gap-2.5"><div class="avatar" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${e.first[0]}${e.last[0]}</div><div><div class="font-bold">${esc(e.first)} ${esc(e.last)}</div><div class="muted text-[11px]">${e.id} • ${esc(e.role)}</div></div></div></td><td><span class="badge bg-indigo-50 text-indigo-700">${e.dept}</span></td><td>${e.loc}</td><td class="font-bold">${eur(e.salary)}</td><td>${'★'.repeat(e.performance)}<span class="text-slate-300">${'★'.repeat(5-e.performance)}</span></td><td><b>${e.engagement}</b><span class="muted">/10</span></td><td><span class="badge ${rcb}">${e.risk}% ${rc.toUpperCase()}</span></td><td><span class="badge ${e.status==='Active'?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700'}">● ${e.status}</span></td><td><div class="flex gap-1.5"><button onclick="openDrawer('${e.id}')" class="btn-ghost !py-1 !px-2.5 !text-xs">View</button>${session.role!=='Viewer'?`<button onclick="openEmpModal('${e.id}')" class="btn-ghost !py-1 !px-2.5 !text-xs">Edit</button>`:''}${session.role==='Admin'?`<button onclick="delEmp('${e.id}')" class="btn-ghost !py-1 !px-2.5 !text-xs !text-rose-600 !border-rose-200">Del</button>`:''}</div></td></tr>`}).join('')||'<tr><td colspan="9" class="text-center muted py-8">No employees match filters.</td></tr>';
+}
+
+/* ============ ATTRITION ============ */
+function filterRisk(v){filters.risk=v;document.querySelectorAll('[data-r]').forEach(b=>b.classList.toggle('on',b.dataset.r===v));renderRiskList()}
+function renderAttrition(){
+  const F=filtered();
+  mk('cTurn',{type:'line',data:{labels:['Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'],datasets:[{label:'Voluntary',data:[3,2,4,2,5,2,3,4,2,3,4,2],borderColor:'#f43f5e',tension:.45,borderWidth:2.5},{label:'Involuntary',data:[1,1,1,0,1,1,1,1,1,1,1,1],borderColor:'#94a3b8',borderDash:[5,4],tension:.45,borderWidth:2}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12}}},maintainAspectRatio:false}});
+  mk('cExit',{type:'doughnut',data:{labels:EXIT_REASONS,datasets:[{data:[28,24,16,10,12,10],backgroundColor:['#6366f1','#a855f7','#ec4899','#f59e0b','#06b6d4','#10b981'],borderWidth:3,borderColor:'#fff'}]},options:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},maintainAspectRatio:false}});
+  const high=F.filter(e=>e.risk>=68).length;const pct=high/F.length*100;
+  document.getElementById('riskPct').textContent=pct.toFixed(1)+'%';
+  document.getElementById('riskSub').textContent=`${high} people likely to leave • cost at risk ${eur(high*62000*0.6)}`;
+  setTimeout(()=>{document.getElementById('riskRing').style.transition='stroke-dashoffset 1.2s ease';document.getElementById('riskRing').style.strokeDashoffset=326-326*pct/30},100);
+  renderRiskList();
+}
+function renderRiskList(){
+  let rows=[...filtered()].sort((a,b)=>b.risk-a.risk);
+  if(filters.risk!=='all')rows=rows.filter(e=>riskCat(e.risk)===filters.risk);
+  rows=rows.slice(0,12);
+  document.getElementById('riskList').innerHTML=rows.map(e=>{const g=AV_GRADS[e.first.length%6];const rc=riskCat(e.risk);const col=rc==='High'?'#f43f5e':rc==='Medium'?'#f59e0b':'#10b981';const drivers=[];if(e.engagement<=5)drivers.push('Low engagement');if(e.lastPromo>3)drivers.push('No promotion 3y+');if(e.overtime==='High')drivers.push('High overtime');if(e.salary<salaryFor(e.dept,e.level)*0.92)drivers.push('Below band');if(tenureY(e)<1.5)drivers.push('Short tenure');return `<div class="rounded-2xl border border-slate-200 p-4 hover:shadow-card transition bg-white dark:bg-slate-900"><div class="flex items-center gap-3"><div class="avatar !w-11 !h-11" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${e.first[0]}${e.last[0]}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${esc(e.first)} ${esc(e.last)}</div><div class="muted text-xs">${esc(e.role)} • ${tenureY(e).toFixed(1)}y tenure</div></div><div class="text-right"><div class="font-display font-800 text-lg" style="color:${col}">${e.risk}%</div><div class="text-[10px] font-bold" style="color:${col}">${rc.toUpperCase()} RISK</div></div></div><div class="risk-bar mt-3"><div class="risk-fill" style="width:${e.risk}%;background:${col}"></div></div><div class="flex flex-wrap gap-1.5 mt-2.5">${drivers.map(d=>`<span class="badge bg-slate-100 text-slate-600">⚠ ${d}</span>`).join('')||'<span class="badge bg-emerald-50 text-emerald-700">Stable</span>'}</div><div class="flex gap-2 mt-3"><button onclick="retain('${e.id}')" class="btn-primary !py-1.5 !text-xs flex-1">Retain plan</button><button onclick="openDrawer('${e.id}')" class="btn-ghost !py-1.5 !text-xs flex-1">360° view</button></div></div>`}).join('');
+}
+async function retain(id){const e=DB.employees.find(x=>x.id===id);await API_updateEmployee(id,{engagement:Math.min(10,e.engagement+2),lastPromo:0});toast(`Retention plan launched for <b>${esc(e.first)} ${esc(e.last)}</b> — 1:1 scheduled, comp review queued.`);renderAll()}
+async function runRetention(){toast('Retention playbook running… salary reviews + stay interviews queued for high-risk cohort.','warn');await apiDelay();DB.audit.unshift({ts:Date.now(),user:session.name,action:'POST /api/retention/run',details:'Playbook executed on high-risk cohort'});renderAudit();renderAll()}
+
+/* ============ PERFORMANCE ============ */
+function renderPerf(){
+  const F=filtered();
+  mk('cGoals',{type:'bar',data:{labels:DEPTS.slice(0,6),datasets:[{data:DEPTS.slice(0,6).map(d=>Math.round(avg(F.filter(e=>e.dept===d).map(e=>e.goals))||70)),backgroundColor:'#10b981',borderRadius:8}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100}},maintainAspectRatio:false}});
+  const top=[...F].filter(e=>e.performance>=4).sort((a,b)=>b.goals-a.goals).slice(0,5);
+  document.getElementById('topPerf').innerHTML=top.map((e,i)=>{const g=AV_GRADS[i%6];return `<div class="flex items-center gap-2.5"><span class="font-800 text-slate-300 font-display">#${i+1}</span><div class="avatar" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${e.first[0]}${e.last[0]}</div><div class="flex-1 min-w-0"><div class="text-[13px] font-bold truncate">${esc(e.first)} ${esc(e.last)}</div><div class="muted text-[11px]">${e.dept} • ${e.goals}% goals</div></div><span class="badge bg-amber-50 text-amber-700">★ ${e.performance}</span></div>`}).join('');
+  // 9-box
+  const boxes=[['Rough Diamond','Future Star','Star',2],['Inconsistent','Key Player','High Potential',1],['Underperformer','Average','Trusted Pro',0]];
+  const perfOf=e=>e.performance>=4?2:e.performance===3?1:0, potOf=e=>e.potential>=8?2:e.potential>=6?1:0;
+  const cols=['#fee2e2,#fef3c7,#dcfce7','#fef3c7,#e0e7ff,#d1fae5','#fecaca,#cbd5e1,#bbf7d0'];
+  let html='';boxes.forEach((row,r)=>{row.slice(0,3).forEach((label,c)=>{const n=F.filter(e=>perfOf(e)=== (2-r) && potOf(e)===c).length;html+=`<div class="box9" style="background:linear-gradient(135deg,${cols[r].split(',')[c]}33,#fff)" onclick="showNine('${label}',${2-r},${c})"><b class="font-display text-2xl">${n}</b><small class="muted">${label}</small><span class="text-[10px] muted">P${2-r+1} × Pot${c+1}</span></div>`})});
+  document.getElementById('nineBox').innerHTML=html;
+}
+function showNine(label,p,po){const rows=filtered().filter(e=>(e.performance>=4?2:e.performance===3?1:0)===p&&(e.potential>=8?2:e.potential>=6?1:0)===po).slice(0,9);document.getElementById('nineList').classList.remove('hidden');document.getElementById('nineTitle').textContent=`${label} — ${rows.length} people`;document.getElementById('nineBody').innerHTML=rows.map(e=>`<div class="flex items-center gap-3 p-3 rounded-xl border"><div class="avatar grad-bg2">${e.first[0]}${e.last[0]}</div><div><div class="font-bold text-sm">${esc(e.first)} ${esc(e.last)}</div><div class="muted text-xs">${e.dept} • ★${e.performance} • Pot ${e.potential}/10</div></div></div>`).join('')||'<span class="muted text-sm">No one in this box for current filters.</span>';document.getElementById('nineList').scrollIntoView({behavior:'smooth',block:'nearest'})}
+
+/* ============ RECRUITMENT ============ */
+function renderRec(){
+  const C=DB.candidates;
+  const st=['Applied','Screening','Interview','Offer','Hired'];
+  const counts=st.map(s=>C.filter(c=>c.stage===s).length);
+  document.getElementById('recKpis').innerHTML=[['Active Candidates',C.length,'▲ +6 this week'],['Time-to-Hire','24d','▼ -5d improved'],['Offer Accept','78%','▲ +4 pts'],['Open Roles','14','Engineering ×6']].map(([l,v,s])=>`<div class="card p-4"><div class="muted text-xs font-bold uppercase tracking-wider">${l}</div><div class="font-display text-2xl font-800 mt-1">${v}</div><div class="text-xs text-emerald-600 font-bold mt-1">${s}</div></div>`).join('');
+  mk('cFunnel',{type:'bar',data:{labels:st,datasets:[{data:counts,backgroundColor:['#6366f1','#8b5cf6','#a855f7','#ec4899','#10b981'],borderRadius:10}]},options:{indexAxis:'y',plugins:{legend:{display:false}},maintainAspectRatio:false}});
+  const src=['LinkedIn','Referral','Indeed','Website','Agency'].map(s=>C.filter(c=>c.source===s).length);
+  mk('cSource',{type:'doughnut',data:{labels:['LinkedIn','Referral','Indeed','Website','Agency'],datasets:[{data:src,backgroundColor:['#0ea5e9','#6366f1','#a855f7','#ec4899','#f59e0b'],borderWidth:3,borderColor:'#fff'}]},options:{cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},maintainAspectRatio:false}});
+  const roles=[['Senior Backend Engineer','Engineering',18,24],['Product Designer','Product',12,20],['Account Executive','Sales',22,20],['Data Scientist','Data Science',9,15],['Support Lead','Support',14,16],['Finance Controller','Finance',6,10]];
+  document.getElementById('openRoles').innerHTML=roles.map(([r,d,a,t])=>`<div class="p-3 rounded-xl border hover:border-indigo-200 transition"><div class="flex justify-between text-[13px]"><b>${r}</b><span class="badge bg-indigo-50 text-indigo-700">${a} appl.</span></div><div class="muted text-[11px]">${d} • closing in ${t-a}d</div><div class="risk-bar mt-2"><div class="risk-fill grad-bg" style="width:${a/t*100}%"></div></div></div>`).join('');
+  const stages=['Applied','Screening','Interview','Offer','Hired'];
+  document.getElementById('kanban').innerHTML=stages.map(s=>`<div class="kanban-col flex-1"><div class="flex items-center justify-between px-1 pb-2"><b class="text-xs uppercase tracking-wider">${s}</b><span class="badge bg-white border">${C.filter(c=>c.stage===s).length}</span></div>${C.filter(c=>c.stage===s).map(c=>`<div class="cand" onclick="advanceCand('${c.id}')"><div class="flex items-center gap-2"><div class="avatar !w-8 !h-8 !text-[10px]" style="background:linear-gradient(135deg,${c.avatar[0]},${c.avatar[1]})">${c.name.split(' ').map(w=>w[0]).join('')}</div><div class="min-w-0"><div class="font-bold text-[13px] truncate">${esc(c.name)}</div><div class="muted text-[11px] truncate">${esc(c.role)}</div></div></div><div class="flex items-center justify-between mt-2"><span class="badge bg-slate-100 text-slate-600">${c.source}</span><span class="text-xs font-800 ${c.score>=85?'text-emerald-600':'text-amber-600'}">◉ ${c.score}</span></div></div>`).join('')||'<div class="text-center muted text-xs py-4 border border-dashed rounded-xl">Drop here</div>'}</div>`).join('');
+}
+function advanceCand(id){const c=DB.candidates.find(x=>x.id===id);const order=['Applied','Screening','Interview','Offer','Hired'];const i=order.indexOf(c.stage);if(i<4){c.stage=order[i+1];DB.audit.unshift({ts:Date.now(),user:session.name,action:`PATCH /api/candidates/${id}`,details:`Moved ${c.name} → ${c.stage}`});persist();renderAudit();renderRec();toast(`<b>${esc(c.name)}</b> advanced to <b>${c.stage}</b>`)}else toast('Already hired 🎉','warn')}
+function openCandModal(){document.getElementById('candModal').classList.remove('hidden')}
+function saveCandidate(){const n=document.getElementById('cName').value||'New Candidate';DB.candidates.push({id:'CAND-'+ri(300,999),name:n,role:document.getElementById('cRole').value||'Generalist',stage:document.getElementById('cStage').value,source:'Website',score:ri(65,95),avatar:pick(AV_GRADS)});persist();document.getElementById('candModal').classList.add('hidden');renderRec();toast(`Candidate <b>${esc(n)}</b> added to pipeline`)}
+
+/* ============ COMP ============ */
+function renderComp(){
+  const F=filtered();
+  const avgs=DEPTS.map(d=>Math.round(avg(F.filter(e=>e.dept===d).map(e=>e.salary))||0));
+  mk('cSalDept',{type:'bar',data:{labels:DEPTS,datasets:[{data:avgs,backgroundColor:'#6366f1',borderRadius:10}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+eur(c.raw)}}},maintainAspectRatio:false}});
+  const gaps=DEPTS.map(d=>{const rows=F.filter(e=>e.dept===d);const m=avg(rows.filter(e=>e.gender==='Male').map(e=>e.salary)),f=avg(rows.filter(e=>e.gender==='Female').map(e=>e.salary));return m?+(((f-m)/m*100).toFixed(1)):0});
+  mk('cPayGap',{type:'bar',data:{labels:DEPTS,datasets:[{data:gaps,backgroundColor:gaps.map(g=>g<-5?'#f43f5e':g<0?'#fb923c':'#10b981'),borderRadius:8}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+'%'}}},scales:{x:{min:-20,max:10}},maintainAspectRatio:false}});
+  const bands=['<40k','40-55k','55-70k','70-90k','90-120k','120k+'];const dist=[F.filter(e=>e.salary<40000).length,F.filter(e=>e.salary>=40000&&e.salary<55000).length,F.filter(e=>e.salary>=55000&&e.salary<70000).length,F.filter(e=>e.salary>=70000&&e.salary<90000).length,F.filter(e=>e.salary>=90000&&e.salary<120000).length,F.filter(e=>e.salary>=120000).length];
+  mk('cSalDist',{type:'bar',data:{labels:bands,datasets:[{data:dist,backgroundColor:['#22d3ee','#6366f1','#8b5cf6','#a855f7','#ec4899','#f59e0b'],borderRadius:10}]},options:{plugins:{legend:{display:false}},maintainAspectRatio:false}});
+  const med=[...F.map(e=>e.salary)].sort((a,b)=>a-b)[Math.floor(F.length/2)]||65000;
+  document.getElementById('compKpis').innerHTML=[['Median Salary',eur(med),'▲ +4.2% YoY'],['Gender Pay Gap',payGap().toFixed(1)+'%','▼ improving'],['Below Band','18 people','Review advised'],['Comp Budget',eur(F.reduce((s,e)=>s+e.salary,0)),F.length+' FTE']].map(([l,v,s])=>`<div class="card p-4"><div class="muted text-xs font-bold uppercase tracking-wider">${l}</div><div class="font-display text-2xl font-800 mt-1">${v}</div><div class="text-xs text-indigo-600 font-bold mt-1">${s}</div></div>`).join('');
+}
+
+/* ============ REPORTS ============ */
+const REP_METRICS=['Headcount summary','Attrition analysis','Diversity & inclusion','Engagement scores','Compensation bands','Performance ratings','Flight-risk register','Hiring funnel'];
+function renderReports(){document.getElementById('repOpts').innerHTML=REP_METRICS.map((m,i)=>`<label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer hover:border-indigo-300 transition"><input type="checkbox" ${i<3?'checked':''} value="${m}" class="w-4 h-4 accent-indigo-600"/> ${m}</label>`).join('')}
+function setRepFmt(btn,f){repFmt=f;document.querySelectorAll('#page-reports .chip').forEach(c=>c.classList.remove('on'));btn.classList.add('on')}
+function buildReport(){const sel=[...document.querySelectorAll('#repOpts input:checked')].map(i=>i.value);if(!sel.length)return toast('Select at least one metric','err');const F=filtered();document.getElementById('repPreview').innerHTML=`<div class="flex items-center justify-between flex-wrap gap-2"><div><h3 class="font-display font-800 text-lg">Board Report — Q4 2026</h3><p class="muted text-xs">Generated ${new Date().toLocaleString()} • ${repFmt} • ${sel.length} sections • scope: ${filters.dept||'All depts'}</p></div><span class="badge bg-emerald-50 text-emerald-700">✓ Ready to download</span></div><div class="grid md:grid-cols-3 gap-3 mt-4">${[['Headcount',F.length,'+7.8%'],['Attrition',(leavers().length/(F.length+leavers().length)*100).toFixed(1)+'%','-2.1pts'],['Engagement',avg(F.map(e=>e.engagement)).toFixed(1),'eNPS +34']].map(([l,v,s])=>`<div class="p-4 rounded-xl bg-slate-50 border text-center"><div class="muted text-xs font-bold">${l}</div><div class="font-display font-800 text-2xl">${v}</div><div class="text-xs text-emerald-600 font-bold">${s}</div></div>`).join('')}</div><div class="mt-4 space-y-2">${sel.map(s=>`<div class="flex items-center gap-3 p-3 rounded-xl border"><div class="w-9 h-9 rounded-lg grad-bg2 text-white grid place-items-center">◈</div><div class="flex-1"><b class="text-sm">${s}</b><div class="muted text-xs">Live-computed from ${F.length} records • chart + commentary included</div></div><span class="badge bg-indigo-50 text-indigo-700">p.${ri(2,14)}</span></div>`).join('')}</div><button onclick="toast('Report exported as <b>${repFmt}</b> — check downloads (simulated).')" class="btn-primary w-full mt-4">⭳ Download ${repFmt}</button>`;DB.audit.unshift({ts:Date.now(),user:session.name,action:'POST /api/reports',details:`Generated ${repFmt} with ${sel.length} sections`});renderAudit();toast(`Report built with <b>${sel.length}</b> sections`)}
+
+/* ============ SETTINGS / API EXPLORER ============ */
+const ENDPOINTS=[['GET','/api/employees','List active employees'],['POST','/api/employees','Create employee'],['PUT','/api/employees/:id','Update employee'],['DELETE','/api/employees/:id','Delete employee (Admin)'],['GET','/api/analytics/attrition','Attrition aggregates'],['GET','/api/audit','Audit trail']];
+function renderSettings(){document.getElementById('apiList').innerHTML=ENDPOINTS.map(([m,p,d],i)=>`<div class="flex items-center gap-3 p-2.5 rounded-xl border hover:border-indigo-300 transition text-sm"><span class="badge ${m==='GET'?'bg-emerald-50 text-emerald-700':m==='POST'?'bg-indigo-50 text-indigo-700':m==='PUT'?'bg-amber-50 text-amber-700':'bg-rose-50 text-rose-700'} font-mono">${m}</span><div class="flex-1 min-w-0"><code class="font-mono text-[12px] font-bold">${p}</code><div class="muted text-[11px]">${d}</div></div><button onclick="tryApi(${i})" class="btn-ghost !py-1 !px-3 !text-xs">TRY</button></div>`).join('');document.getElementById('dbSize').textContent=(DB.employees.length+DB.candidates.length)+' docs';document.getElementById('dbKB').textContent=(JSON.stringify(DB).length/1024).toFixed(1)+' KB';renderAudit()}
+async function tryApi(i){const[m,p]=ENDPOINTS[i];const out=document.getElementById('apiOut');out.textContent='→ '+m+' '+p+' … (awaiting backend 200ms)';let res;try{if(p==='/api/employees'&&m==='GET')res={status:200,count:activeEmps().length,data:(await API_listEmployees()).slice(0,2)};else if(p==='/api/analytics/attrition')res={status:200,attritionRate:+(leavers().length/(activeEmps().length+leavers().length)*100).toFixed(1),highRisk:activeEmps().filter(e=>e.risk>=68).length,topDriver:'Compensation (28%)'};else if(p==='/api/audit')res={status:200,events:DB.audit.slice(0,3)};else res={status:200,message:'Endpoint live — use UI actions (Add/Edit/Delete) to exercise writes. Writes are audit-logged.'};out.innerHTML=`<span class="text-slate-500">// ${m} ${p} — 200 OK • ${(180+rnd()*300).toFixed(0)}ms</span>\n`+esc(JSON.stringify(res,null,2)).slice(0,1200)}catch(err){out.textContent='✕ '+err.message}}
+function renderAudit(){const el=document.getElementById('auditLog');if(!el)return;el.innerHTML=DB.audit.slice(0,30).map(a=>`<div class="flex gap-2.5 p-2.5 rounded-xl bg-slate-50 border dark:bg-slate-800"><div class="timeline-dot mt-1 ${a.action.startsWith('DELETE')?'bg-rose-500':a.action.startsWith('POST')?'bg-indigo-500':'bg-emerald-500'}"></div><div class="min-w-0"><div class="font-bold font-mono text-[11px]">${esc(a.action)}</div><div class="text-slate-500">${esc(a.details||'')} • ${esc(a.user)} • ${new Date(a.ts).toLocaleString()}</div></div></div>`).join('')||'<span class="muted">No events yet.</span>'}
+function clearLog(){DB.audit=[];persist();renderAudit()}
+function exportJSON(){const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='arcada-hr-backup.json';a.click();toast('Database backup downloaded')}
+function importJSON(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{DB=JSON.parse(r.result);persist();renderAll();toast('Database restored from backup')}catch(e){toast('Invalid backup file','err')}};r.readAsText(f)}
+function toggleLive(){liveOn=!liveOn;document.getElementById('liveBtn').innerHTML=liveOn?'● Live sync: ON':'○ Live sync: OFF';toast(liveOn?'Live sync resumed — simulated realtime events':'Live sync paused','warn')}
+
+/* ============ CRUD UI ============ */
+let editingId=null;
+function openEmpModal(id=null){if(session.role==='Viewer')return toast('Viewers cannot modify records (403)','err');editingId=id;const d=document.getElementById('eDept');if(!d.options.length){d.innerHTML=DEPTS.map(x=>`<option>${x}</option>`).join('');document.getElementById('eLoc').innerHTML=LOCS.map(x=>`<option>${x}</option>`).join('')}if(id){const e=DB.employees.find(x=>x.id===id);document.getElementById('empModalTitle').textContent='Edit '+e.first+' '+e.last;document.getElementById('eFirst').value=e.first;document.getElementById('eLast').value=e.last;document.getElementById('eDept').value=e.dept;document.getElementById('eRole').value=e.role;document.getElementById('eLoc').value=e.loc;document.getElementById('eLevel').value=e.level;document.getElementById('eGender').value=e.gender;document.getElementById('eAge').value=e.age;document.getElementById('eSalary').value=e.salary;document.getElementById('ePerf').value=e.performance;document.getElementById('eEng').value=e.engagement;document.getElementById('eType').value=e.type}else{document.getElementById('empModalTitle').textContent='Add Employee';['eFirst','eLast','eRole'].forEach(k=>document.getElementById(k).value='')}document.getElementById('empModal').classList.remove('hidden')}
+function closeEmpModal(){document.getElementById('empModal').classList.add('hidden')}
+async function saveEmployee(){const f=document.getElementById('eFirst').value.trim(),l=document.getElementById('eLast').value.trim();if(!f||!l)return toast('First & last name required','err');const payload={first:f,last:l,dept:document.getElementById('eDept').value,role:document.getElementById('eRole').value||'Team Member',loc:document.getElementById('eLoc').value,level:document.getElementById('eLevel').value,gender:document.getElementById('eGender').value,age:+document.getElementById('eAge').value||30,salary:+document.getElementById('eSalary').value||60000,performance:+document.getElementById('ePerf').value||3,engagement:+document.getElementById('eEng').value||7,type:document.getElementById('eType').value};try{if(editingId){await API_updateEmployee(editingId,payload);toast(`<b>${esc(f)} ${esc(l)}</b> updated via PUT /api/employees`)}else{const e=await API_createEmployee(payload);toast(`<b>${esc(e.first)} ${esc(e.last)}</b> created • ${e.id} • risk ${e.risk}%`)}closeEmpModal();renderAll()}catch(err){toast(err.message,'err')}}
+async function delEmp(id){if(!confirm('Delete this employee? (DELETE /api/employees)'))return;try{const e=await API_deleteEmployee(id);toast(`Removed <b>${esc(e.first)} ${esc(e.last)}</b>`);renderAll()}catch(err){toast(err.message,'err')}}
+function exportCSV(){const rows=filtered();const csv='ID,Name,Email,Dept,Role,Level,Location,Salary,Performance,Engagement,Risk,Status\n'+rows.map(e=>`${e.id},"${e.first} ${e.last}",${e.email},${e.dept},"${e.role}",${e.level},${e.loc},${e.salary},${e.performance},${e.engagement},${e.risk},${e.status}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='arcada-directory.csv';a.click();toast(`Exported <b>${rows.length}</b> records to CSV`)}
+function openDrawer(id){const e=DB.employees.find(x=>x.id===id);if(!e)return;const g=AV_GRADS[(e.first.length+e.last.length)%6];const col=e.risk>=68?'#f43f5e':e.risk>=42?'#f59e0b':'#10b981';document.getElementById('drawerBody').innerHTML=`<div class="flex justify-between items-start"><button onclick="closeDrawer()" class="text-slate-400 text-2xl">×</button></div><div class="text-center"><div class="avatar !w-20 !h-20 !text-2xl mx-auto" style="background:linear-gradient(135deg,${g[0]},${g[1]})">${e.first[0]}${e.last[0]}</div><h3 class="font-display font-800 text-xl mt-3">${esc(e.first)} ${esc(e.last)}</h3><p class="muted text-sm">${esc(e.role)} • ${e.dept}</p><div class="flex justify-center gap-2 mt-2"><span class="badge bg-indigo-50 text-indigo-700">${e.id}</span><span class="badge ${e.status==='Active'?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700'}">${e.status}</span></div></div><div class="mt-5 p-4 rounded-2xl border" style="border-color:${col}55;background:${col}0d"><div class="flex justify-between items-center"><b class="text-sm">Flight risk</b><b class="font-display text-xl" style="color:${col}">${e.risk}% ${riskCat(e.risk)}</b></div><div class="risk-bar mt-2"><div class="risk-fill" style="width:${e.risk}%;background:${col}"></div></div></div><div class="grid grid-cols-2 gap-2.5 mt-4 text-sm">${[['Email',e.email],['Location',e.loc],['Level',e.level],['Type',e.type],['Salary',eur(e.salary)],['Tenure',tenureY(e).toFixed(1)+' years'],['Performance','★'.repeat(e.performance)],['Engagement',e.engagement+'/10'],['Satisfaction',e.sat+'/10'],['Overtime',e.overtime],['Last promo',e.lastPromo+'y ago'],['Potential',e.potential+'/10']].map(([k,v])=>`<div class="p-3 rounded-xl bg-slate-50 border dark:bg-slate-800"><div class="muted text-[11px] font-bold uppercase">${k}</div><div class="font-bold truncate">${esc(v)}</div></div>`).join('')}</div><div class="flex gap-2 mt-5">${session.role!=='Viewer'?`<button onclick="closeDrawer();openEmpModal('${e.id}')" class="btn-primary flex-1">Edit record</button>`:''}<button onclick="retain('${e.id}')" class="btn-ghost flex-1">Launch retain plan</button></div><p class="muted text-[11px] mt-3 text-center">Served by GET /api/employees/${e.id} • 200 OK • audited</p>`;document.getElementById('drawer').classList.remove('hidden')}
+function closeDrawer(){document.getElementById('drawer').classList.add('hidden')}
+
+/* ============ GLOBAL: search, cmd, notif, AI, theme ============ */
+function setFilter(k,v){filters[k]=v;page=1;renderAll()}
+function onGlobalSearch(v){const s=document.getElementById('empSearch');if(s){s.value=v}if(v.length>1){go('workforce');renderTable()}}
+function toggleSide(){document.getElementById('sidebar').classList.toggle('-translate-x-full')}
+function toggleTheme(){document.documentElement.classList.toggle('dark');toast(document.documentElement.classList.contains('dark')?'Dark mode enabled':'Light mode enabled')}
+function toggleNotif(){const p=document.getElementById('notifPanel');p.classList.toggle('hidden');if(!p.classList.contains('hidden')){const F=filtered();const hi=[...F].sort((a,b)=>b.risk-a.risk).slice(0,4);p.innerHTML=`<div class="p-3 font-display font-bold">Notifications <span class="badge bg-rose-500 text-white ml-1">${hi.length}</span></div>`+hi.map(e=>`<div class="flex gap-2.5 p-3 rounded-xl hover:bg-slate-50 cursor-pointer" onclick="openDrawer('${e.id}');toggleNotif()"><div class="w-2 h-2 rounded-full bg-rose-500 mt-1.5 shrink-0"></div><div class="text-[13px]"><b>${esc(e.first)} ${esc(e.last)}</b> is high flight-risk (${e.risk}%).<div class="muted text-[11px]">Suggested: stay interview this week • ${e.dept}</div></div></div>`).join('')+`<button onclick="go('attrition');toggleNotif()" class="btn-primary w-full mt-1 !py-2 !text-xs">Open retention inbox →</button>`}}
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.getElementById('cmdK').classList.toggle('hidden');renderCmd('');setTimeout(()=>document.getElementById('cmdInput').focus(),50)}if(e.key==='Escape'){['cmdK','empModal','candModal','aiPanel'].forEach(id=>document.getElementById(id)?.classList.add('hidden'));closeDrawer()}});
+document.getElementById('cmdK')?.addEventListener('click',e=>{if(e.target.id==='cmdK')e.target.classList.add('hidden')});
+function renderCmd(q){q=(q||'').toLowerCase();const acts=[['→ Go to Overview',"go('overview')"],['→ Go to Attrition',"go('attrition')"],['→ Go to Recruitment',"go('recruitment')"],['→ Go to Compensation',"go('compensation')"],['＋ Add Employee','openEmpModal()'],['⭳ Export CSV','exportCSV()'],['✦ Ask AI Copilot','openAI()'],['↺ Reset demo data','seed(true);renderAll()']].filter(([l])=>l.toLowerCase().includes(q));const emps=activeEmps().filter(e=>(e.first+' '+e.last+' '+e.dept).toLowerCase().includes(q)).slice(0,6);document.getElementById('cmdList').innerHTML=acts.map(([l,fn])=>`<div onclick="document.getElementById('cmdK').classList.add('hidden');${fn}" class="p-3 rounded-xl hover:bg-indigo-50 cursor-pointer text-sm font-bold">⌕ ${l}</div>`).join('')+emps.map(e=>`<div onclick="document.getElementById('cmdK').classList.add('hidden');openDrawer('${e.id}')" class="p-3 rounded-xl hover:bg-indigo-50 cursor-pointer text-sm flex justify-between"><span><b>${esc(e.first)} ${esc(e.last)}</b> <span class="muted">• ${e.dept}</span></span><span class="badge bg-slate-100">${e.id}</span></div>`).join('')||'<div class="p-6 text-center muted text-sm">No results</div>'}
+function openAI(){document.getElementById('aiPanel').classList.toggle('hidden')}
+function askAI(){const inp=document.getElementById('aiInput');const q=inp.value.trim();if(!q)return;const box=document.getElementById('aiChat');box.innerHTML+=`<div class="user-msg ml-8">${esc(q)}</div>`;inp.value='';const F=filtered();const lq=q.toLowerCase();let a;const byDept=DEPTS.map(d=>({d,v:DB.employees.filter(e=>e.dept===d&&e.status==='Exited').length})).sort((x,y)=>y.v-x.v)[0];
+if(lq.includes('attrit')||lq.includes('leave')||lq.includes('quit'))a=`Attrition is <b>${(leavers().length/(F.length+leavers().length)*100).toFixed(1)}%</b> (${leavers().length} exits). Highest in <b>${byDept.d}</b>. Top drivers: compensation (28%), career growth (24%). <b>${F.filter(e=>e.risk>=68).length}</b> people are high-risk right now — I recommend stay interviews + band review. Want me to open the risk register?`;
+else if(lq.includes('pay')||lq.includes('gap')||lq.includes('salary')||lq.includes('comp'))a=`Median salary is <b>${eur([...F.map(e=>e.salary)].sort((x,y)=>x-y)[Math.floor(F.length/2)])}</b>. Gender pay gap (F/M) is <b>${payGap().toFixed(1)}%</b>. <b>18</b> people sit below their band — largest gaps in Sales & Support. Recommend a 3–5% equity adjustment cycle.`;
+else if(lq.includes('headcount')||lq.includes('how many')||lq.includes('hiring'))a=`You have <b>${F.length} active</b> employees (+18 QoQ) across ${DEPTS.length} departments. Pipeline: <b>${DB.candidates.length} candidates</b>, avg time-to-hire <b>24 days</b>, offer-accept <b>78%</b>. Engineering has 6 open roles — the bottleneck stage is Interview → Offer.`;
+else if(lq.includes('divers'))a=`Gender split: <b>${Math.round(F.filter(e=>e.gender==='Female').length/F.length*100)}% female</b>, ${Math.round(F.filter(e=>e.gender==='Male').length/F.length*100)}% male. Best balance: HR & Marketing. Focus area: Engineering leadership pipeline.`;
+else if(lq.includes('engag')||lq.includes('enps')||lq.includes('happy'))a=`Engagement averages <b>${avg(F.map(e=>e.engagement)).toFixed(1)}/10</b> (eNPS +34). Lowest: Support (${avg(F.filter(e=>e.dept==='Support').map(e=>e.engagement)).toFixed(1)}). Quick win: recognise top performers + fix overtime hotspots.`;
+else if(lq.includes('who')&&lq.includes('risk'))a=`Top risks: ${[...F].sort((x,y)=>y.risk-x.risk).slice(0,3).map(e=>`<b>${esc(e.first)} ${esc(e.last)}</b> (${e.risk}%, ${e.dept})`).join(', ')}. Click any name in Attrition → Flight-Risk Register to launch a retain plan.`;
+else a=`Based on <b>${F.length}</b> live records: attrition <b>${(leavers().length/(F.length+leavers().length)*100).toFixed(1)}%</b>, engagement <b>${avg(F.map(e=>e.engagement)).toFixed(1)}/10</b>, median pay <b>${eur(65000)}</b>. Ask me about <i>attrition drivers, pay gap, headcount, diversity</i> or <i>who is at risk</i>.`;
+setTimeout(()=>{box.innerHTML+=`<div class="ai-msg mr-6">${a}</div>`;box.scrollTop=box.scrollHeight},500);box.scrollTop=box.scrollHeight}
+
+/* ============ AUTH ============ */
+function fillLogin(r){document.getElementById('loginRole').value=r}
+function doLogin(){const em=document.getElementById('loginEmail').value||'sarah.lindqvist@arcada.app';const role=document.getElementById('loginRole').value.split(' — ')[0];session={name:em.split('@')[0].split('.').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ')||'Demo User',role};document.getElementById('userName').textContent=session.name;document.getElementById('userRole').textContent=role+(role==='Admin'?' • full access':role==='Manager'?' • edit only':' • read only');document.getElementById('userAvatar').textContent=session.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();if(role==='Viewer')document.getElementById('addBtn').style.display='none';document.getElementById('loginScreen').style.display='none';document.getElementById('app').classList.remove('hidden');DB.audit.unshift({ts:Date.now(),user:session.name,action:'POST /api/auth/login',details:`Signed in as ${role}`});renderAll();toast(`Welcome back, <b>${esc(session.name)}</b> — backend session established`);setInterval(()=>{document.getElementById('latency').textContent=Math.round(28+rnd()*60)+'ms'},2500)}
+function logout(){location.reload()}
+
+/* ============ MASTER RENDER + LIVE SIM ============ */
+function renderAll(){renderOverview();renderWorkforce();renderAttrition();renderPerf();renderRec();renderComp();renderReports();renderSettings();persist()}
+setInterval(()=>{if(!liveOn||document.getElementById('app').classList.contains('hidden'))return;const F=activeEmps();const e=pick(F);if(e&&rnd()<0.5){e.engagement=Math.max(1,Math.min(10,e.engagement+pick([-1,1])));e.risk=calcRisk(e);if(document.getElementById('page-overview').classList.contains('active'))renderOverview()}},9000);
+
+/* ============ INIT ============ */
+buildNav();
+document.getElementById('fDept').innerHTML='<option value="">All Departments</option>'+DEPTS.map(d=>`<option>${d}</option>`).join('');
+document.getElementById('fLoc').innerHTML='<option value="">All Locations</option>'+LOCS.map(l=>`<option>${l}</option>`).join('');
+seed(false);
+</script>
+</body>
+</html>
