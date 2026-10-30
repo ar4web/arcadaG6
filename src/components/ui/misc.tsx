@@ -1,43 +1,13 @@
 import * as React from 'react';
 import { Info, Inbox } from 'lucide-react';
-import { cn, initials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 export { Badge } from './badge';
 
 /* --------------------------------- Avatar --------------------------------- */
 
-const SIZES = { xs: 'size-6 text-[9px]', sm: 'size-7 text-[10px]', md: 'size-9 text-[11.5px]', lg: 'size-12 text-sm', xl: 'size-16 text-lg' } as const;
-
-export function Avatar({
-  name,
-  hue = 0,
-  size = 'md',
-  className,
-  ring,
-}: {
-  name: string;
-  hue?: number;
-  size?: keyof typeof SIZES;
-  className?: string;
-  ring?: boolean;
-}) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'inline-grid shrink-0 place-items-center rounded-full font-semibold uppercase tracking-wide text-white/95 select-none',
-        SIZES[size],
-        ring && 'ring-2 ring-surface',
-        className,
-      )}
-      style={{
-        background: `linear-gradient(145deg, hsl(${hue} 32% 48%), hsl(${(hue + 28) % 360} 34% 38%))`,
-      }}
-    >
-      {initials(name)}
-    </span>
-  );
-}
+// Radix-backed avatar with a deterministic initials fallback.
+export { Avatar } from './avatar';
 
 /* -------------------------------- Skeleton -------------------------------- */
 

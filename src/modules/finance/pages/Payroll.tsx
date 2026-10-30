@@ -12,7 +12,7 @@ import { Avatar, Badge, Skeleton } from '@/components/ui/misc';
 import { PageFooter, PageHeader } from '@/modules/shell/PageHeader';
 import { methodology } from '@/lib/copy';
 import { MethodologyNote } from '@/modules/shell/PageHeader';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const STATUS_TONE = { draft: 'neutral', review: 'warning', approved: 'info', paid: 'success' } as const;
 

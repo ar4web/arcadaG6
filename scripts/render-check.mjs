@@ -4,7 +4,7 @@
  * that type-checking cannot see. Run with: node scripts/render-check.mjs
  */
 import { Window } from 'happy-dom';
-import { renderRoute, renderWidgets } from '../dist-ssr/entry-server.js';
+import { renderPrimitives, renderRoute, renderWidgets } from '../dist-ssr/entry-server.js';
 
 const ROUTES = [
   '/hr', '/hr/people', '/hr/org', '/hr/leave', '/hr/attendance', '/hr/recruitment',
@@ -74,6 +74,19 @@ try {
 } catch (error) {
   failed += 1;
   process.stdout.write(`FAIL  ${'widgets (all)'.padEnd(22)} THREW\n`);
+  originalError(error);
+}
+
+// UI kit primitives (calendar, slider, command, avatars).
+try {
+  const html = renderPrimitives();
+  const ok = html.length > 1500 && html.includes('rdp') || html.includes('grid');
+  if (!ok) failed += 1;
+  inspect('primitives', html);
+  process.stdout.write(`${ok ? 'PASS' : 'FAIL'}  ${'ui primitives'.padEnd(22)} ${String(html.length).padStart(7)} chars\n`);
+} catch (error) {
+  failed += 1;
+  process.stdout.write(`FAIL  ${'ui primitives'.padEnd(22)} THREW\n`);
   originalError(error);
 }
 

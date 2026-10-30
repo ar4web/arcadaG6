@@ -17,7 +17,7 @@ import { Card, CardHeading } from '@/components/ui/card';
 import { Badge } from '@/components/ui/misc';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PageFooter, PageHeader } from '@/modules/shell/PageHeader';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const REPORTS: { id: string; name: string; description: string; build: () => ReportTable }[] = [
   { id: 'employees', name: 'Employee register', description: 'Every active employee with grade, location and gross pay.', build: employeeRegisterReport },

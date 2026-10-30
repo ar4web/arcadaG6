@@ -12,7 +12,7 @@ import { Field, Input, NativeSelect } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PageFooter, PageHeader } from '@/modules/shell/PageHeader';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const PERMISSION_LABELS: Record<string, string> = {
   'employees.read': 'View employees',

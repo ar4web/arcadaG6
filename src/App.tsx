@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryProvider } from '@/lib/query';
 import { AppShell } from '@/modules/shell/AppShell';
@@ -65,7 +65,7 @@ export default function App() {
   return (
     <QueryProvider>
       <TooltipProvider delayDuration={200}>
-        <Toaster position="bottom-right" toastOptions={{ style: { fontSize: '12px', borderRadius: '10px' } }} />
+        <Toaster />
         <Suspense fallback={<PageSkeleton />} key={location.pathname.split('/')[1]}>
           <Routes>
             <Route path="/" element={<Navigate to="/hr" replace />} />

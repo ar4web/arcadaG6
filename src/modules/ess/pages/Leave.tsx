@@ -11,10 +11,12 @@ import { cn, daysBetween, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeading } from '@/components/ui/card';
 import { Badge, EmptyState, Progress } from '@/components/ui/misc';
-import { Field, Input, NativeSelect, Textarea } from '@/components/ui/input';
+import { Field, NativeSelect, Textarea } from '@/components/ui/input';
 import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { PageFooter, PageHeader } from '@/modules/shell/PageHeader';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function EssLeave() {
   const locale = useUIStore((s) => s.locale);
@@ -26,6 +28,14 @@ export default function EssLeave() {
   const [start, setStart] = React.useState('2026-11-16');
   const [end, setEnd] = React.useState('2026-11-20');
   const [reason, setReason] = React.useState('');
+  const range = React.useMemo(() => ({ from: new Date(start), to: new Date(end) }), [start, end]);
+
+  const pickRange = (next: { from?: Date; to?: Date } | undefined) => {
+    if (!next?.from) return;
+    const toISO = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+    setStart(toISO(next.from));
+    setEnd(toISO(next.to ?? next.from));
+  };
 
   const { data: balances } = useQuery({ queryKey: ['my-balances', employeeId], queryFn: () => leaveBalances(employeeId) });
   const { data: requests } = useQuery({ queryKey: ['my-leave', employeeId], queryFn: () => listLeaveRequests({ employeeId }) });
@@ -152,14 +162,28 @@ export default function EssLeave() {
                   ))}
                 </NativeSelect>
               </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="From" required>
-                  <Input type="date" value={start} onChange={(event) => setStart(event.target.value)} />
-                </Field>
-                <Field label="To" required>
-                  <Input type="date" value={end} onChange={(event) => setEnd(event.target.value)} />
-                </Field>
-              </div>
+              <Field label="Dates" required hint="Pick the first and last day of your leave.">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="secondary" size="sm" className="w-full justify-between font-normal">
+                      <span className="inline-flex items-center gap-1.5">
+                        <CalendarDays className="size-3.5 text-ink-4" />
+                        {formatDate(start, 'd MMM yyyy', locale)} — {formatDate(end, 'd MMM yyyy', locale)}
+                      </span>
+                      <span className="num text-[10.5px] text-ink-4">{days} day{days === 1 ? '' : 's'}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-auto p-0">
+                    <Calendar
+                      mode="range"
+                      selected={range}
+                      onSelect={pickRange}
+                      numberOfMonths={2}
+                      disabled={{ before: new Date('2026-10-31') }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </Field>
               <div className={cn('rounded-md px-2.5 py-1.5 text-[10.5px]', days > (annual?.remaining ?? 0) && type === 'annual' ? 'bg-danger-soft text-danger' : 'bg-surface-2 text-ink-3')}>
                 {days} working days requested
                 {type === 'annual' ? ` · ${annual?.remaining ?? 0} remaining` : ''}

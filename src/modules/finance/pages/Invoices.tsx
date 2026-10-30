@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card';
 import { Badge, EmptyState, Skeleton } from '@/components/ui/misc';
 import { Input, NativeSelect } from '@/components/ui/input';
 import { PageFooter, PageHeader } from '@/modules/shell/PageHeader';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const STATUS_TONE: Record<InvoiceStatus, 'neutral' | 'info' | 'success' | 'danger' | 'warning'> = {
   draft: 'neutral',

@@ -43,6 +43,11 @@ import NotFound from '@/modules/system/pages/NotFound';
 import { WIDGETS } from '@/components/widgets/registry';
 import { buildAnalytics } from '@/lib/mock/analytics';
 import { chartPalette } from '@/components/charts/theme';
+import { Avatar } from '@/components/ui/avatar';
+import { Calendar } from '@/components/ui/calendar';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { db } from '@/lib/mock/db';
 
 export function renderRoute(path: string) {
@@ -117,4 +122,31 @@ export function renderWidgets() {
 
 function WidgetHost({ widget, ctx }: { widget: (typeof WIDGETS)[number]; ctx: Parameters<(typeof WIDGETS)[number]['render']>[0] }) {
   return <section data-widget={widget.id}>{widget.render(ctx)}</section>;
+}
+
+
+/** Smoke-renders the shadcn-style kit so a broken primitive fails CI. */
+export function renderPrimitives() {
+  return renderToString(
+    <TooltipProvider>
+      <div>
+        <Avatar name="Layla Al Harbi" hue={28} size="lg" />
+        <Avatar name="Omar Nasser" src="https://example.com/missing.png" />
+        <Separator />
+        <Slider defaultValue={[40]} max={100} step={5} aria-label="Headcount band" />
+        <Slider defaultValue={[20, 70]} max={100} step={5} aria-label="Salary band" />
+        <Calendar mode="range" selected={{ from: new Date('2026-11-16'), to: new Date('2026-11-20') }} numberOfMonths={2} />
+        <Calendar mode="single" selected={new Date('2026-10-31')} />
+        <Command>
+          <CommandInput placeholder="Search" />
+          <CommandList>
+            <CommandEmpty>No results</CommandEmpty>
+            <CommandGroup heading="Pages">
+              <CommandItem>Payroll</CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </div>
+    </TooltipProvider>,
+  );
 }

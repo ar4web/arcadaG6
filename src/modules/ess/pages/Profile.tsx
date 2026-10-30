@@ -12,7 +12,7 @@ import { Avatar, Badge, Progress, Skeleton } from '@/components/ui/misc';
 import { Field, Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { PageFooter, PageHeader } from '@/modules/shell/PageHeader';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function EssProfile() {
   const locale = useUIStore((s) => s.locale);

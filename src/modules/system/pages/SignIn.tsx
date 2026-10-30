@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { Badge, Segmented } from '@/components/ui/misc';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function SignIn() {
   const navigate = useNavigate();

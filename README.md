@@ -30,7 +30,9 @@ The app boots straight into an admin session so the whole workspace is explorabl
 | `npm run preview` | Serve the production build |
 | `npm run lint` | ESLint, zero-error policy |
 | `npm run typecheck` | TypeScript project build |
-| `npm run test:render` | Headless render check: 31 routes + 39 widgets |
+| `npm run test:render` | Headless render check: 31 routes, 39 widgets, UI kit |
+| `npm run test:e2e` | Playwright specs (needs `npx playwright install chromium`) |
+| `npm run test:all` | typecheck + lint + render check |
 | `npm run db:lint` | Parse every migration and the seed with a real Postgres parser |
 | `npm run db:up` / `db:down` / `db:reset` | Local Postgres + Studio + Mailpit + MinIO |
 | `npm run db:seed` | Load the demo dataset |
@@ -58,6 +60,13 @@ scripts/              render check, migration linter, seed generator
 same shapes whether they are backed by the in-memory mock store (`VITE_DATA_SOURCE=mock`)
 or by Supabase (`VITE_DATA_SOURCE=supabase`). React Query owns caching and mutation
 invalidation.
+
+**Component kit.** Shadcn-style primitives on Radix: `button`, `input`, `textarea`,
+`select`, `native select`, `checkbox`, `switch`, `slider`, `dialog`, `popover`, `tabs`,
+`tooltip`, `dropdown-menu`, `table`, `badge`, `avatar` (photo + initials fallback),
+`separator`, `command` (cmdk), `calendar` (react-day-picker), `toast` (sonner), cards and
+page skeletons. All of them read the shared tokens, so they work in light, dark and RTL
+without per-component overrides.
 
 **Design system.** Warm sage/terracotta palette defined as CSS custom properties in
 `src/index.css` and bridged into Tailwind v4 with `@theme inline`; light and dark themes,
@@ -95,8 +104,15 @@ npm run test:render
 ```
 
 It fails on thrown errors, React warnings, or `undefined` / `NaN` / `[object Object]` leaking
-into markup — the class of bug a type-checker cannot see. Playwright specs land in Phase 3
-once a browser is available.
+into markup — the class of bug a type-checker cannot see.
+
+Playwright specs live in `tests/` (`playwright.config.ts` starts the dev server, runs
+desktop Chrome and a Pixel 7 profile). The first run needs a browser binary:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
 
 ## Roadmap
 

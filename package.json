@@ -15,7 +15,10 @@
     "db:up": "docker compose up -d db studio mailpit minio",
     "db:down": "docker compose down",
     "db:reset": "docker compose down -v && docker compose up -d db",
-    "db:seed": "docker compose exec -T db psql -U postgres -d arcada -f /docker-entrypoint-initdb.d/zz-seed.sql"
+    "db:seed": "docker compose exec -T db psql -U postgres -d arcada -f /docker-entrypoint-initdb.d/zz-seed.sql",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:all": "npm run typecheck && npm run lint && npm run test:render"
   },
   "dependencies": {
     "@date-fns/tz": "^1.2.0",
@@ -54,6 +57,7 @@
     "lucide-react": "^0.577.0",
     "papaparse": "^5.5.3",
     "react": "^18.3.1",
+    "react-day-picker": "^10.0.2",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.6.1",
     "react-router-dom": "^6.30.1",
@@ -79,7 +83,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "happy-dom": "^21.0.4",
-    "pgsql-parser": "^3.11.0",
+    "pgsql-parser": "^18.3.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1"
