@@ -2,6 +2,8 @@ import type { Employee, Paginated, TableQuery } from '@/types';
 import { db, departmentMap, displayName, locationMap } from '@/lib/mock/db';
 import { DEPARTMENTS } from '@/lib/mock/master';
 import { applyTableQuery, request, write, sortRows } from './api';
+import { isSupabaseEnabled } from '@/lib/supabase';
+import * as remote from './remote/employees';
 import { uid } from '@/lib/utils';
 
 export interface EmployeeFilters {
@@ -20,6 +22,7 @@ const searchIndex = (e: Employee) =>
     .join(' ');
 
 export async function listEmployees(filters: EmployeeFilters = {}): Promise<Paginated<Employee>> {
+  if (isSupabaseEnabled) return remote.listEmployees(filters);
   return request(() => {
     let rows = db.employees.filter((e) => e.status !== 'terminated');
     if (filters.department && filters.department !== 'all') rows = rows.filter((e) => e.departmentId === filters.department);
@@ -30,10 +33,12 @@ export async function listEmployees(filters: EmployeeFilters = {}): Promise<Pagi
 }
 
 export async function listAllEmployees(): Promise<Employee[]> {
+  if (isSupabaseEnabled) return remote.listAllEmployees();
   return request(() => db.employees.filter((e) => e.status !== 'terminated'));
 }
 
 export async function getEmployee(id: string): Promise<Employee> {
+  if (isSupabaseEnabled) return remote.getEmployee(id);
   return request(() => {
     const employee = db.employees.find((e) => e.id === id);
     if (!employee) throw new Error('Employee not found');
@@ -42,6 +47,7 @@ export async function getEmployee(id: string): Promise<Employee> {
 }
 
 export async function createEmployee(input: Partial<Employee>): Promise<Employee> {
+  if (isSupabaseEnabled) return remote.createEmployee(input);
   return write(() => {
     const nextNo = db.employees.length + 1001;
     const employee: Employee = {
@@ -84,6 +90,7 @@ export async function createEmployee(input: Partial<Employee>): Promise<Employee
 }
 
 export async function updateEmployee(id: string, patch: Partial<Employee>): Promise<Employee> {
+  if (isSupabaseEnabled) return remote.updateEmployee(id, patch);
   return write(() => {
     const index = db.employees.findIndex((e) => e.id === id);
     if (index < 0) throw new Error('Employee not found');
@@ -93,6 +100,7 @@ export async function updateEmployee(id: string, patch: Partial<Employee>): Prom
 }
 
 export async function terminateEmployee(id: string, reason: string): Promise<Employee> {
+  if (isSupabaseEnabled) return remote.terminateEmployee(id, reason);
   return write(() => {
     const index = db.employees.findIndex((e) => e.id === id);
     if (index < 0) throw new Error('Employee not found');
@@ -104,6 +112,7 @@ export async function terminateEmployee(id: string, reason: string): Promise<Emp
 }
 
 export async function employeeDirectoryForSelect() {
+  if (isSupabaseEnabled) return remote.employeeDirectoryForSelect();
   return request(() =>
     sortRows(
       db.employees.filter((e) => e.status !== 'terminated'),

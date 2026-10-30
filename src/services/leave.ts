@@ -2,8 +2,11 @@ import type { LeaveBalance, LeaveRequest, LeaveStatus, LeaveType } from '@/types
 import { db, getEmployee } from '@/lib/mock/db';
 import { request, write } from './api';
 import { addDaysISO, daysBetween, todayISO } from '@/lib/utils';
+import { isSupabaseEnabled } from '@/lib/supabase';
+import * as remote from './remote/leave';
 
 export async function listLeaveRequests(filters: { status?: LeaveStatus | 'all'; department?: string; employeeId?: string } = {}) {
+  if (isSupabaseEnabled) return remote.listLeaveRequests(filters);
   return request(() => {
     let rows = [...db.leave];
     if (filters.status && filters.status !== 'all') rows = rows.filter((r) => r.status === filters.status);
@@ -16,6 +19,7 @@ export async function listLeaveRequests(filters: { status?: LeaveStatus | 'all';
 }
 
 export async function leaveBalances(employeeId: string): Promise<LeaveBalance[]> {
+  if (isSupabaseEnabled) return remote.leaveBalances(employeeId);
   return request(() => {
     const employee = getEmployee(employeeId);
     if (!employee) return [];
@@ -31,6 +35,7 @@ export async function leaveBalances(employeeId: string): Promise<LeaveBalance[]>
 }
 
 export async function decideLeave(id: string, status: Extract<LeaveStatus, 'approved' | 'rejected'>, actor = 'HR admin') {
+  if (isSupabaseEnabled) return remote.decideLeave(id, status);
   return write(() => {
     const request = db.leave.find((r) => r.id === id);
     if (!request) throw new Error('Leave request not found');
@@ -65,6 +70,7 @@ export async function createLeaveRequest(input: {
   reason: string;
   handoverTo?: string;
 }): Promise<LeaveRequest> {
+  if (isSupabaseEnabled) return remote.createLeaveRequest(input);
   return write(() => {
     const days = Math.max(1, daysBetween(input.startDate, input.endDate) + 1);
     const request: LeaveRequest = {
@@ -85,6 +91,7 @@ export async function createLeaveRequest(input: {
 }
 
 export async function cancelLeave(id: string) {
+  if (isSupabaseEnabled) return remote.cancelLeave(id);
   return write(() => {
     const request = db.leave.find((r) => r.id === id);
     if (!request) throw new Error('Leave request not found');
@@ -94,6 +101,7 @@ export async function cancelLeave(id: string) {
 }
 
 export async function upcomingAbsences(days = 21) {
+  if (isSupabaseEnabled) return remote.upcomingAbsences(days);
   return request(() => {
     const from = todayISO();
     const to = addDaysISO(from, days);

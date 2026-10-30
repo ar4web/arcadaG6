@@ -31,6 +31,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['organizations']['Row']> & { name: string; slug: string };
         Update: Partial<Database['public']['Tables']['organizations']['Row']>;
+        Relationships: [];
       };
       workspace_settings: {
         Row: {
@@ -50,6 +51,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['workspace_settings']['Row']> & { org_id: string };
         Update: Partial<Database['public']['Tables']['workspace_settings']['Row']>;
+        Relationships: [];
       };
       departments: {
         Row: {
@@ -69,6 +71,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['departments']['Row']> & { org_id: string; code: string; name: string };
         Update: Partial<Database['public']['Tables']['departments']['Row']>;
+        Relationships: [];
       };
       locations: {
         Row: {
@@ -89,6 +92,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['locations']['Row']> & { org_id: string; code: string; name: string; city: string };
         Update: Partial<Database['public']['Tables']['locations']['Row']>;
+        Relationships: [];
       };
       employees: {
         Row: {
@@ -148,6 +152,7 @@ export interface Database {
           hire_date: string;
         };
         Update: Partial<Database['public']['Tables']['employees']['Row']>;
+        Relationships: [];
       };
       leave_types: {
         Row: {
@@ -166,6 +171,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['leave_types']['Row']> & { org_id: string; code: string; name: string };
         Update: Partial<Database['public']['Tables']['leave_types']['Row']>;
+        Relationships: [];
       };
       leave_balances: {
         Row: {
@@ -187,6 +193,7 @@ export interface Database {
           year: number;
         };
         Update: Partial<Database['public']['Tables']['leave_balances']['Row']>;
+        Relationships: [];
       };
       leave_requests: {
         Row: {
@@ -218,6 +225,7 @@ export interface Database {
           working_days: number;
         };
         Update: Partial<Database['public']['Tables']['leave_requests']['Row']>;
+        Relationships: [];
       };
       attendance_records: {
         Row: {
@@ -243,6 +251,7 @@ export interface Database {
           work_date: string;
         };
         Update: Partial<Database['public']['Tables']['attendance_records']['Row']>;
+        Relationships: [];
       };
       payroll_runs: {
         Row: {
@@ -266,6 +275,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['payroll_runs']['Row']> & { org_id: string; period: string };
         Update: Partial<Database['public']['Tables']['payroll_runs']['Row']>;
+        Relationships: [];
       };
       payslips: {
         Row: {
@@ -291,6 +301,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['payslips']['Row']> & { org_id: string; run_id: string; employee_id: string };
         Update: Partial<Database['public']['Tables']['payslips']['Row']>;
+        Relationships: [];
       };
       expense_claims: {
         Row: {
@@ -324,6 +335,7 @@ export interface Database {
           description: string;
         };
         Update: Partial<Database['public']['Tables']['expense_claims']['Row']>;
+        Relationships: [];
       };
       customers: {
         Row: {
@@ -343,6 +355,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['customers']['Row']> & { org_id: string; name: string };
         Update: Partial<Database['public']['Tables']['customers']['Row']>;
+        Relationships: [];
       };
       invoices: {
         Row: {
@@ -375,6 +388,7 @@ export interface Database {
           due_date: string;
         };
         Update: Partial<Database['public']['Tables']['invoices']['Row']>;
+        Relationships: [];
       };
       job_openings: {
         Row: {
@@ -401,6 +415,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['job_openings']['Row']> & { org_id: string; reference: string; title: string };
         Update: Partial<Database['public']['Tables']['job_openings']['Row']>;
+        Relationships: [];
       };
       candidates: {
         Row: {
@@ -433,6 +448,7 @@ export interface Database {
           email: string;
         };
         Update: Partial<Database['public']['Tables']['candidates']['Row']>;
+        Relationships: [];
       };
       documents: {
         Row: {
@@ -460,6 +476,7 @@ export interface Database {
           storage_path: string;
         };
         Update: Partial<Database['public']['Tables']['documents']['Row']>;
+        Relationships: [];
       };
       notifications: {
         Row: {
@@ -478,6 +495,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['notifications']['Row']> & { org_id: string; title: string };
         Update: Partial<Database['public']['Tables']['notifications']['Row']>;
+        Relationships: [];
       };
       audit_events: {
         Row: {
@@ -496,6 +514,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['audit_events']['Row']> & { action: string; entity: string };
         Update: never;
+        Relationships: [];
       };
       goals: {
         Row: {
@@ -518,6 +537,7 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['goals']['Row']> & { org_id: string; employee_id: string; title: string };
         Update: Partial<Database['public']['Tables']['goals']['Row']>;
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -536,11 +556,13 @@ export interface Database {
         };
         Insert: Partial<Database['public']['Tables']['profiles']['Row']> & { id: string; org_id: string };
         Update: Partial<Database['public']['Tables']['profiles']['Row']>;
+        Relationships: [];
       };
       user_roles: {
         Row: { id: string; user_id: string; role: string; granted_by: string | null; granted_at: string };
         Insert: Partial<Database['public']['Tables']['user_roles']['Row']> & { user_id: string; role: string };
         Update: Partial<Database['public']['Tables']['user_roles']['Row']>;
+        Relationships: [];
       };
     };
     Views: {
@@ -563,6 +585,7 @@ export interface Database {
           location_name: string | null;
           gross_salary: number | null;
         };
+        Relationships: [];
       };
       headcount_snapshot: {
         Row: {
@@ -575,6 +598,7 @@ export interface Database {
           avg_engagement: number | null;
           monthly_gross: number | null;
         };
+        Relationships: [];
       };
       expiring_documents: {
         Row: {
@@ -587,17 +611,19 @@ export interface Database {
           expires_on: string;
           days_remaining: number;
         };
+        Relationships: [];
       };
     };
     Functions: {
       my_context: { Args: Record<string, never>; Returns: Json };
       dashboard_snapshot: { Args: { p_org?: string }; Returns: Json };
       decide_leave_request: {
-        Args: { p_request_id: string; p_status: string; p_note?: string };
+        Args: { p_request_id: string; p_status: string; p_note?: string | null };
         Returns: Database['public']['Tables']['leave_requests']['Row'];
       };
       set_preferences: { Args: { p_locale?: string; p_theme?: string }; Returns: Json };
     };
+    CompositeTypes: { [_ in never]: never };
     Enums: {
       app_role: 'admin' | 'hr_manager' | 'recruiter' | 'manager' | 'finance' | 'employee';
       employee_status: 'active' | 'probation' | 'on_leave' | 'notice' | 'terminated' | 'alumni';
