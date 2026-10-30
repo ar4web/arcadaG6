@@ -18,7 +18,8 @@
     "db:seed": "docker compose exec -T db psql -U postgres -d arcada -f /docker-entrypoint-initdb.d/zz-seed.sql",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:all": "npm run typecheck && npm run lint && npm run test:render"
+    "test:all": "npm run typecheck && npm run lint && npm run check:contrast && npm run test:render",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
     "@date-fns/tz": "^1.2.0",

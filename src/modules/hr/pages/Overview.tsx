@@ -157,7 +157,7 @@ export default function Overview() {
                         <span
                           className={cn(
                             'grid size-4 shrink-0 place-items-center rounded border',
-                            widget.visible ? 'border-primary bg-primary text-white' : 'border-line-strong',
+                            widget.visible ? 'border-primary bg-primary text-primary-contrast' : 'border-line-strong',
                           )}
                         >
                           {widget.visible ? <Check className="size-2.5" /> : null}

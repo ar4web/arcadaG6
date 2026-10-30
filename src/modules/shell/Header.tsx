@@ -95,7 +95,7 @@ export function Header({ app, onOpenMobile }: { app: AppId; onOpenMobile: () => 
             <Button variant="ghost" size="icon-sm" className="relative" aria-label="Notifications">
               <Bell className="size-4" />
               {unread > 0 ? (
-                <span className="absolute end-1 top-1 grid size-3.5 place-items-center rounded-full bg-primary text-[8px] font-bold text-white ring-2 ring-canvas">{unread}</span>
+                <span className="absolute end-1 top-1 grid size-3.5 place-items-center rounded-full bg-primary text-[8px] font-bold text-primary-contrast ring-2 ring-canvas">{unread}</span>
               ) : null}
             </Button>
           </PopoverTrigger>

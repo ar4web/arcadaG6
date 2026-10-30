@@ -152,7 +152,8 @@ export default function People() {
 
   const rows = data?.rows ?? [];
   const scrollRef = React.useRef<HTMLDivElement>(null);
-  const rowHeight = density === 'compact' ? 40 : 48;
+  // Matches --row-height (36px) with a tighter compact setting.
+  const rowHeight = density === 'compact' ? 30 : 36;
 
   const virtualizer = useVirtualizer({
     count: rows.length,
@@ -276,7 +277,7 @@ export default function People() {
                 onClick={() => columnStore.toggleColumn('people', column.key)}
                 className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-surface-3"
               >
-                <span className={cn('grid size-4 place-items-center rounded border', !hidden.includes(column.key) ? 'border-primary bg-primary text-white' : 'border-line-strong')}>
+                <span className={cn('grid size-4 place-items-center rounded border', !hidden.includes(column.key) ? 'border-primary bg-primary text-primary-contrast' : 'border-line-strong')}>
                   {!hidden.includes(column.key) ? <Check className="size-2.5" /> : null}
                 </span>
                 <span className="text-[11.5px] text-ink-2">{column.label}</span>

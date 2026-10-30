@@ -18,19 +18,19 @@ export interface ChartPalette {
 }
 
 const FALLBACK: ChartPalette = {
-  series: ['#c26a37', '#e0a06a', '#6d8a5f', '#a8bc96', '#d9b382', '#8a7a9e', '#7d9aa8', '#c3bda8'],
-  grid: '#eaeee3',
-  axis: '#8d9784',
-  ink: '#262c23',
-  inkMuted: '#6f7a66',
-  surface: '#ffffff',
-  line: '#e4e8dc',
-  primary: '#b95f2d',
-  accent: '#5f7d52',
-  success: '#4f7a45',
-  warning: '#a87328',
-  danger: '#b3453a',
-  info: '#4a7189',
+  series: ['#2dd4bf', '#f97316', '#3b82f6', '#a855f7', '#f59e0b', '#ef4444', '#64748b', '#94a3b8'],
+  grid: '#232323',
+  axis: '#666666',
+  ink: '#f0f0f0',
+  inkMuted: '#a0a0a0',
+  surface: '#141414',
+  line: '#2a2a2a',
+  primary: '#2dd4bf',
+  accent: '#f97316',
+  success: '#22c55e',
+  warning: '#f59e0b',
+  danger: '#ef4444',
+  info: '#3b82f6',
 };
 
 function readPalette(): ChartPalette {

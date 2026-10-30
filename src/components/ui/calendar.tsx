@@ -38,7 +38,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         day: 'relative size-8 p-0 text-center',
         day_button:
           'num inline-grid size-8 cursor-pointer place-items-center rounded-md text-[11.5px] text-ink-2 transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary-ring/40 focus-visible:outline-none',
-        selected: '[&_button]:bg-primary [&_button]:text-white [&_button]:hover:bg-primary',
+        selected: '[&_button]:bg-primary [&_button]:text-primary-contrast [&_button]:hover:bg-primary',
         today: '[&_button]:font-semibold [&_button]:text-primary',
         outside: 'text-ink-4/60',
         disabled: 'opacity-35',

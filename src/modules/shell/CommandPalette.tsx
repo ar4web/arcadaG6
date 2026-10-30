@@ -6,6 +6,8 @@ import {
   Building2,
   CalendarPlus,
   CornerDownLeft,
+  Eye,
+  EyeOff,
   Moon,
   Search,
   Sparkles,
@@ -13,11 +15,13 @@ import {
   UserPlus,
   Users,
   Wallet,
+  ZapOff,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { db, displayName } from '@/lib/mock/db';
 import { Avatar } from '@/components/ui/misc';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
 import { NAV, APP_META } from './navigation';
 import type { AppId } from '@/types';
@@ -31,6 +35,10 @@ export function CommandPalette() {
   const setTheme = useUIStore((s) => s.setTheme);
   const locale = useUIStore((s) => s.locale);
   const setLocale = useUIStore((s) => s.setLocale);
+  const highContrast = useUIStore((s) => s.highContrast);
+  const setHighContrast = useUIStore((s) => s.setHighContrast);
+  const reduceMotion = useUIStore((s) => s.reduceMotion);
+  const setReduceMotion = useUIStore((s) => s.setReduceMotion);
   const session = useAuthStore((s) => s.session);
   const hasPermission = useAuthStore((s) => s.hasPermission);
   const navigate = useNavigate();
@@ -87,6 +95,22 @@ export function CommandPalette() {
     { icon: Wallet, label: 'Open the October payroll run', run: () => go('/finance/payroll') },
     { icon: Sparkles, label: 'Review compliance watchlist', run: () => go('/hr/compliance') },
     { icon: theme === 'dark' ? Sun : Moon, label: `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`, run: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
+    {
+      icon: highContrast ? EyeOff : Eye,
+      label: `${highContrast ? 'Disable' : 'Enable'} high contrast`,
+      run: () => {
+        setHighContrast(!highContrast);
+        toast.success(highContrast ? 'High contrast off' : 'High contrast on');
+      },
+    },
+    {
+      icon: ZapOff,
+      label: `${reduceMotion ? 'Enable' : 'Reduce'} motion`,
+      run: () => {
+        setReduceMotion(!reduceMotion);
+        toast.success(reduceMotion ? 'Motion enabled' : 'Reduced motion on');
+      },
+    },
     { icon: Building2, label: locale === 'en' ? 'التبديل إلى العربية' : 'Switch to English', run: () => setLocale(locale === 'en' ? 'ar' : 'en') },
   ];
 

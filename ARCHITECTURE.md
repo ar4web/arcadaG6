@@ -33,6 +33,20 @@ screens  →  services  →  transport  →  supabase | mock
 - **Mock store** (`src/lib/mock/*`) is deterministic: the clock is frozen at
   `TODAY_ISO = 2026-10-31`, IDs are stable, and the dataset is generated once at module load.
 
+## Design tokens
+
+`src/index.css` is the only place colour, type, spacing and geometry are defined.
+
+| Layer | Tokens | Consumed by |
+| --- | --- | --- |
+| Raw (spec) | `--bg`, `--bg-card`, `--bg-elevated`, `--bg-input`, `--border`, `--text-primary/secondary/tertiary`, `--success/warning/danger/info` (+ `-dim`), `--accent`, `--accent-2`, `--chart-1..8`, `--space-*`, `--radius-*`, `--row-height`, `--header-height`, `--sidebar-*`, `--text-xs..2xl`, `--font-en/ar` | designers, new components |
+| Semantic | `--canvas`, `--surface`, `--surface-2/3`, `--ink`, `--ink-2/3/4`, `--line`, `--primary*`, `--accent-*`, `--success-*`… | every screen via Tailwind utilities |
+| Accessible | `data-theme`, `data-hc`, `data-reduce-motion`, `dir` on `<html>` | `applyDocumentPreferences()` in `src/stores/ui.ts` |
+
+`npm run check:contrast` resolves the `var()`/`color-mix()` chains and asserts WCAG AA for
+body text, muted text, button labels, badges and the active sidebar item across dark, light
+and high-contrast — it fails the build script if a token drifts.
+
 ## State
 
 | Store | Owns | Persistence |

@@ -296,7 +296,14 @@ export function Sidebar({ app, mobileOpen, onCloseMobile }: { app: AppId; mobile
         )}
 
         {/* Nav */}
-        <nav className="scrollbar-none flex-1 overflow-y-auto px-3 pb-2">
+        <nav
+          className={cn(
+            'scrollbar-none flex-1 overflow-y-auto pb-2 transition-[padding] duration-200',
+            // At 48px the rail has no room for 12px gutters — trim them so the
+            // icon target keeps a 36px hit area.
+            collapsed ? 'lg:px-1.5' : 'px-3',
+          )}
+        >
           {groups.map((group) => (
             <NavGroupBlock
               key={group.key}
@@ -337,7 +344,7 @@ export function Sidebar({ app, mobileOpen, onCloseMobile }: { app: AppId; mobile
         ) : null}
 
         {/* Footer */}
-        <div className={cn('border-t border-line p-3', collapsed && 'px-1.5')}>
+        <div className={cn('border-t border-line p-2', collapsed && 'lg:px-1.5')}>
           {!collapsed ? (
             <Link to="/help" className="mb-2 flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[12px] font-medium text-ink-3 transition-colors hover:bg-surface-3 hover:text-ink">
               <CircleHelp className="size-4" />

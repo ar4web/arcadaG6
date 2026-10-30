@@ -35,7 +35,7 @@ export function TH({ className, align = 'start', ...props }: Omit<React.ThHTMLAt
     <th
       scope="col"
       className={cn(
-        'whitespace-nowrap border-b border-line px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.055em] text-ink-4',
+        'whitespace-nowrap border-b border-line px-2.5 py-2 text-[10.5px] font-semibold uppercase tracking-[0.055em] text-ink-4',
         align === 'end' && 'text-end',
         align === 'center' && 'text-center',
         align === 'start' && 'text-start',
@@ -50,7 +50,7 @@ export function TD({ className, align = 'start', ...props }: Omit<React.TdHTMLAt
   return (
     <td
       className={cn(
-        'px-3 py-2.5 text-[12.5px] text-ink-2 align-middle',
+        'px-2.5 py-1.5 text-[12.5px] text-ink-2 align-middle',
         align === 'end' && 'text-end',
         align === 'center' && 'text-center',
         className,

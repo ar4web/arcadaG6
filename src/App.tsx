@@ -44,12 +44,14 @@ export default function App() {
   const theme = useUIStore((s) => s.theme);
   const locale = useUIStore((s) => s.locale);
   const density = useUIStore((s) => s.density);
+  const highContrast = useUIStore((s) => s.highContrast);
+  const reduceMotion = useUIStore((s) => s.reduceMotion);
   const hydrate = useAuthStore((s) => s.hydrate);
   const location = useLocation();
 
   useEffect(() => {
-    applyDocumentPreferences(theme, locale, density);
-  }, [theme, locale, density]);
+    applyDocumentPreferences(theme, locale, density, highContrast, reduceMotion);
+  }, [theme, locale, density, highContrast, reduceMotion]);
 
   useEffect(() => {
     void hydrate();
@@ -57,10 +59,10 @@ export default function App() {
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => applyDocumentPreferences(theme, locale, density);
+    const handler = () => applyDocumentPreferences(theme, locale, density, highContrast, reduceMotion);
     media.addEventListener('change', handler);
     return () => media.removeEventListener('change', handler);
-  }, [theme, locale, density]);
+  }, [theme, locale, density, highContrast, reduceMotion]);
 
   return (
     <QueryProvider>

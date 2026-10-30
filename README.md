@@ -68,9 +68,13 @@ invalidation.
 page skeletons. All of them read the shared tokens, so they work in light, dark and RTL
 without per-component overrides.
 
-**Design system.** Warm sage/terracotta palette defined as CSS custom properties in
-`src/index.css` and bridged into Tailwind v4 with `@theme inline`; light and dark themes,
-tabular numerals, RTL-aware logical properties throughout.
+**Design system.** Dark-first token set in `src/index.css` — surfaces (`--bg`, `--bg-card`,
+`--bg-elevated`, `--bg-input`), text ramp, signals, teal/orange brand pair, an 11/13/14 px
+type scale, 5 px radii, 48 px rail, 48 px header, 36 px rows. Components consume a semantic
+layer (`--canvas`, `--surface`, `--ink`, `--primary`, …) bridged into Tailwind v4 with
+`@theme inline`, so a palette change never touches a screen. Theme switching is attribute
+based (`data-theme`, `data-hc`, `data-reduce-motion`, `dir`), and `npm run check:contrast`
+audits every text/background pair against WCAG AA in dark, light and high-contrast.
 
 ## Features
 

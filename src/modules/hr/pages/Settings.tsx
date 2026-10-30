@@ -7,7 +7,7 @@ import { useUIStore } from '@/stores/ui';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeading } from '@/components/ui/card';
-import { Badge, Skeleton } from '@/components/ui/misc';
+import { Badge, Segmented, Skeleton } from '@/components/ui/misc';
 import { Field, Input, NativeSelect } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -42,6 +42,14 @@ const INTEGRATIONS = [
 
 export default function Settings() {
   const locale = useUIStore((s) => s.locale);
+  const theme = useUIStore((s) => s.theme);
+  const setTheme = useUIStore((s) => s.setTheme);
+  const density = useUIStore((s) => s.density);
+  const setDensity = useUIStore((s) => s.setDensity);
+  const highContrast = useUIStore((s) => s.highContrast);
+  const setHighContrast = useUIStore((s) => s.setHighContrast);
+  const reduceMotion = useUIStore((s) => s.reduceMotion);
+  const setReduceMotion = useUIStore((s) => s.setReduceMotion);
   const queryClient = useQueryClient();
   const { data: settings, isLoading } = useQuery({ queryKey: ['settings'], queryFn: getSettings });
   // Edits are a patch on top of the fetched record, so a refetch never
@@ -84,6 +92,7 @@ export default function Settings() {
           <TabsTrigger value="workspace">Workspace</TabsTrigger>
           <TabsTrigger value="policy">Leave policy</TabsTrigger>
           <TabsTrigger value="roles">Roles & permissions</TabsTrigger>
+          <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
         </TabsList>
 
@@ -223,6 +232,71 @@ export default function Settings() {
               <KeyRound className="size-3" /> Row-level security enforces workspace isolation; the matrix above is descriptive.
             </div>
           </Card>
+        </TabsContent>
+
+
+        <TabsContent value="appearance">
+          <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2">
+            <Card>
+              <CardHeading title="Theme" description="Applies to this browser only; the workspace default stays dark." />
+              <div className="flex flex-col gap-3 px-5 pb-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11.5px] font-medium text-ink">Colour scheme</p>
+                    <p className="text-[10px] text-ink-4">Dark is the default; light keeps the same token contract.</p>
+                  </div>
+                  <Segmented
+                    value={theme}
+                    onChange={setTheme}
+                    ariaLabel="Colour scheme"
+                    options={[
+                      { value: 'dark', label: 'Dark' },
+                      { value: 'light', label: 'Light' },
+                      { value: 'system', label: 'System' },
+                    ]}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11.5px] font-medium text-ink">Density</p>
+                    <p className="text-[10px] text-ink-4">Compact trims table rows from 36px to 30px.</p>
+                  </div>
+                  <Segmented
+                    value={density}
+                    onChange={setDensity}
+                    ariaLabel="Density"
+                    options={[
+                      { value: 'comfortable', label: 'Comfortable' },
+                      { value: 'compact', label: 'Compact' },
+                    ]}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <CardHeading title="Accessibility" description="Stored per user, honoured on every screen." />
+              <div className="flex flex-col gap-3 px-5 pb-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11.5px] font-medium text-ink">High contrast</p>
+                    <p className="text-[10px] leading-relaxed text-ink-4">Raises text and border contrast to meet WCAG AA in both themes.</p>
+                  </div>
+                  <Switch checked={highContrast} onCheckedChange={setHighContrast} aria-label="High contrast" />
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11.5px] font-medium text-ink">Reduce motion</p>
+                    <p className="text-[10px] leading-relaxed text-ink-4">Disables transitions and entrance animations. System preference is respected automatically.</p>
+                  </div>
+                  <Switch checked={reduceMotion} onCheckedChange={setReduceMotion} aria-label="Reduce motion" />
+                </div>
+                <div className="rounded-md border border-line bg-surface-2 px-2.5 py-1.5 text-[10px] text-ink-4">
+                  Tokens: <span className="num">--text-xs 11 · --text-sm 13 · --row-height 36 · {locale === 'ar' ? 'Cairo' : 'Inter'}</span>
+                </div>
+              </div>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="integrations">
