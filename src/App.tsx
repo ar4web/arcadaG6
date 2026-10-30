@@ -1,67 +1,119 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { LayoutDashboard, Users, CalendarDays, BriefcaseBusiness, ChartNoAxesCombined, Goal, Wallet, ReceiptText, FileText, Settings as SettingsIcon, CircleHelp, Search, Bell, ChevronDown, ChevronRight, ChevronsUpDown, ArrowUpRight, X, Menu, Check, ShieldCheck, Sparkles, LockKeyhole, ArrowLeft, LogIn } from 'lucide-react';
-import { Logo, Avatar, Modal, Badge } from './components/UI';
-import { Dashboard } from './pages/Dashboard';
-import { Employees, LeavePage, Recruitment, Performance } from './pages/People';
-import { Settings, Help } from './pages/Settings';
-import { useStoredState } from './lib/store';
-import { seedEmployees, seedLeave, seedCandidates, initialAudit, departments, exitReasons, permissions, canAccess, canEditPeople, pageLabels, type Employee, type LeaveRequest, type Candidate, type Role, type Page, type AuditEvent } from './lib/data';
-const Finance=lazy(()=>import('./pages/Finance'));
-const navItems=[{page:'dashboard',icon:LayoutDashboard},{page:'employees',icon:Users},{page:'leave',icon:CalendarDays},{page:'recruitment',icon:BriefcaseBusiness},{page:'analytics',icon:ChartNoAxesCombined},{page:'performance',icon:Goal},{page:'payroll',icon:Wallet},{page:'expenses',icon:ReceiptText},{page:'invoicing',icon:FileText}] as const;
-function getPage():Page|'not-found' {const hash=window.location.hash.replace(/^#\/?/,'').split('?')[0];return hash?(Object.hasOwn(pageLabels,hash)?hash as Page:'not-found'):'dashboard';}
-function App() {
- const [employees,setEmployees]=useStoredState<Employee[]>('arcada-people-v1',seedEmployees);
- const [requests,setRequests]=useStoredState<LeaveRequest[]>('arcada-leave-v1',seedLeave);
- const [candidates,setCandidates]=useStoredState<Candidate[]>('arcada-candidates-v1',seedCandidates);
- const [audit,setAudit]=useStoredState<AuditEvent[]>('arcada-audit-v1',initialAudit);
- const [role,setRole]=useStoredState<Role>('arcada-role-v1','Admin');
- const [workspace,setWorkspace]=useStoredState('arcada-workspace-v1','Qimma Group');
- const [page,setPage]=useState<Page|'not-found'>(getPage);
- const [mobileNav,setMobileNav]=useState(false);const [panel,setPanel]=useState<string|null>(null);
- const [search,setSearch]=useState('');const searchRef=useRef<HTMLInputElement>(null);
- const [department,setDepartment]=useState('All departments');const [period,setPeriod]=useState('year');
- const [editing,setEditing]=useState<Employee|'new'|null>(null);const [terminating,setTerminating]=useState<Employee|null>(null);
- const [toast,setToast]=useState('');const timer=useRef<ReturnType<typeof setTimeout>|null>(null);const [notificationsRead,setNotificationsRead]=useState(false);
- const validRole:Role=Object.hasOwn(permissions,role)?role:'Viewer';
- function notify(message:string){setToast(message);if(timer.current)clearTimeout(timer.current);timer.current=setTimeout(()=>setToast(''),5000);}
- function log(action:string){setAudit(prev=>[{id:crypto.randomUUID(),action,date:new Date().toISOString(),user:`Sarah Lindqvist (${validRole})`},...prev].slice(0,200));}
- function navigate(next:Page){if(!canAccess(validRole,next)){notify('This page is not available for your current role.');return;}setPage(next);window.location.assign(`#/${next}`);setMobileNav(false);setPanel(null);setSearch('');window.scrollTo({top:0,behavior:'instant'});}
- function switchRole(next:Role){setRole(next);const target=page!=='not-found'&&canAccess(next,page)?page:permissions[next][0];setPage(target);window.location.assign(`#/${target}`);setPanel(null);setEditing(null);setTerminating(null);notify(`Previewing ${next.toLowerCase()} permissions. This is a local role preview.`);}
- useEffect(()=>{const hash=()=>{setPage(getPage());setPanel(null);setMobileNav(false);};const keyboard=(e:KeyboardEvent)=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();searchRef.current?.focus();setPanel('search');}if(e.key==='Escape'){setPanel(null);setMobileNav(false);}};window.addEventListener('hashchange',hash);window.addEventListener('keydown',keyboard);return()=>{window.removeEventListener('hashchange',hash);window.removeEventListener('keydown',keyboard);if(timer.current)clearTimeout(timer.current);};},[]);
- const pending=requests.filter(r=>r.status==='Pending');
- const searchPages=Object.entries(pageLabels).filter(([id,label])=>canAccess(validRole,id as Page)&&label.toLowerCase().includes(search.toLowerCase()));
- const searchPeople=canAccess(validRole,'employees')&&search.length>1?employees.filter(e=>e.status!=='Exited'&&`${e.name} ${e.department}`.toLowerCase().includes(search.toLowerCase())).slice(0,4):[];
- const currentTitle=page==='not-found'?'Page not found':pageLabels[page];
- function handleLeaveUpdate(next:LeaveRequest[]){if(!canEditPeople(validRole))return;const approved=next.filter(r=>r.status==='Approved'&&requests.find(old=>old.id===r.id)?.status==='Pending'&&r.type==='Annual leave');if(approved.some(r=>(employees.find(e=>e.id===r.employeeId)?.leaveBalance||0)<r.days)){notify('The request exceeds the employee’s remaining annual leave.');return;}setEmployees(prev=>prev.map(e=>({...e,leaveBalance:Math.max(0,e.leaveBalance-approved.filter(r=>r.employeeId===e.id).reduce((sum,r)=>sum+r.days,0))})));setRequests(next);}
- return <div className="app-shell">
- {mobileNav&&<button className="mobile-backdrop" aria-label="Close navigation" onClick={()=>setMobileNav(false)}/>}
- <aside className={`sidebar ${mobileNav?'mobile-open':''}`} aria-label="Main navigation"><button className="brand" onClick={()=>navigate(permissions[validRole][0])}><Logo/><span>arcada<span className="brand-period">.</span></span><span className="brand-close" onClick={e=>{e.stopPropagation();setMobileNav(false);}}><X size={18}/></span></button>
- <div className="workspace-wrapper"><button className="workspace-switch" onClick={()=>setPanel(panel==='workspace'?null:'workspace')} aria-expanded={panel==='workspace'}><span className="workspace-logo">Q</span><span><strong>{workspace}</strong><small>People workspace</small></span><ChevronsUpDown size={14}/></button>{panel==='workspace'&&<div className="workspace-popover popover"><strong>{workspace}</strong><p>Your sample company workspace.</p><Badge>Current workspace</Badge>{canAccess(validRole,'settings')&&<button className="text-link" onClick={()=>navigate('settings')}>Workspace settings<ArrowUpRight size={14}/></button>}</div>}</div>
- <nav className="main-navigation"><div className="nav-group-label">WORKSPACE</div>{navItems.slice(0,6).filter(n=>canAccess(validRole,n.page)).map(({page:id,icon:Icon})=><button className={`nav-link ${page===id?'active':''}`} key={id} onClick={()=>navigate(id)} aria-current={page===id?'page':undefined}><Icon size={18}/><span>{pageLabels[id]}</span>{id==='leave'&&pending.length>0&&<span className="nav-counter">{pending.length}</span>}{id==='analytics'&&<span className="nav-new">NEW</span>}</button>)}
- {navItems.slice(6).some(n=>canAccess(validRole,n.page))&&<div className="nav-group-label finance-label">FINANCE <LockKeyhole size={10}/></div>}{navItems.slice(6).filter(n=>canAccess(validRole,n.page)).map(({page:id,icon:Icon})=><button key={id} className={`nav-link ${page===id?'active':''}`} onClick={()=>navigate(id)} aria-current={page===id?'page':undefined}><Icon size={18}/><span>{pageLabels[id]}</span></button>)}</nav>
- <div className="sidebar-bottom"><div className="sidebar-promo"><div className="promo-art"><svg viewBox="0 0 96 51" fill="none" aria-hidden="true"><path d="M48 49V18M48 40C25 40 23 28 25 22C39 21 49 29 48 40ZM49 30C69 30 75 16 70 10C56 10 46 18 49 30Z" stroke="#aabb94" strokeWidth="2"/><path d="M23 48H76" stroke="#cfd7bf"/><path d="M16 13V21M12 17H20M82 28V34M79 31H85" stroke="#da9e6c" strokeWidth="1.6"/></svg></div><h4>Good people.<br/>Great possibilities.</h4><p>Make room for what’s next.</p><button onClick={()=>navigate(canAccess(validRole,'analytics')?'analytics':'help')}>Explore your workspace<ArrowUpRight size={13}/></button></div>
- <div className="utility-nav">{canAccess(validRole,'settings')&&<button className={`nav-link ${page==='settings'?'active':''}`} onClick={()=>navigate('settings')}><SettingsIcon size={18}/><span>Settings</span></button>}<button className={`nav-link ${page==='help'?'active':''}`} onClick={()=>navigate('help')}><CircleHelp size={18}/><span>Help & resources</span><ArrowUpRight size={13}/></button></div><div className="sidebar-user"><Avatar name="Sarah Lindqvist"/><span><strong>Sarah Lindqvist</strong><small>{validRole==='Admin'?'Workspace admin':validRole} <span>·</span> Demo</small></span><button className="icon-button" aria-label="Change preview role" onClick={()=>setPanel(panel==='profile'?null:'profile')}><ChevronsUpDown size={15}/></button></div></div></aside>
- <div className="workspace-main"><header className="topbar"><div className="breadcrumb"><button className="mobile-menu icon-button" aria-label="Open navigation" onClick={()=>setMobileNav(true)}><Menu size={20}/></button><span>Workspace</span><ChevronRight size={13}/><strong>{currentTitle}</strong></div><div className="topbar-right"><div className="global-search"><Search size={16}/><input ref={searchRef} value={search} onFocus={()=>setPanel('search')} onChange={e=>{setSearch(e.target.value);setPanel('search');}} placeholder="Search anything..." aria-label="Search workspace" onKeyDown={e=>{if(e.key==='Enter'&&searchPages.length){navigate(searchPages[0][0] as Page);searchRef.current?.blur();}}}/><kbd>⌘ K</kbd></div><button className="topbar-help icon-button" aria-label="Help and resources" onClick={()=>navigate('help')}><CircleHelp size={19}/></button><button className="notification-button icon-button" aria-label="Notifications" aria-expanded={panel==='notifications'} onClick={()=>setPanel(panel==='notifications'?null:'notifications')}><Bell size={19}/>{pending.length>0&&!notificationsRead&&canAccess(validRole,'leave')&&<i/>}</button><span className="topbar-divider"/><button className="profile-button" aria-label="Profile and role preview" onClick={()=>setPanel(panel==='profile'?null:'profile')}><Avatar name="Sarah Lindqvist" size="small"/><ChevronDown size={13}/></button></div>
- {panel==='search'&&<div className="search-popover popover"><div className="popover-label">{search?'SEARCH RESULTS':'JUMP TO A PAGE'}</div>{searchPages.map(([id,label])=><button className="search-result" key={id} onClick={()=>navigate(id as Page)}><span className="result-icon"><LayoutDashboard size={16}/></span><span>{label}</span><ChevronRight size={13}/></button>)}{searchPeople.length>0&&<div className="popover-label">PEOPLE</div>}{searchPeople.map((e,i)=><button className="search-result" key={e.id} onClick={()=>{setEditing(e);setPanel(null);setSearch('');}}><Avatar name={e.name} index={i} size="small"/><span><strong>{e.name}</strong><small>{e.department}</small></span><ChevronRight size={13}/></button>)}{!searchPages.length&&!searchPeople.length&&<p className="quiet-message">No results. Try a person or module name.</p>}<div className="search-popover-footer"><ShieldCheck size={13}/>Only pages you can access are shown<button onClick={()=>setPanel(null)}>Esc</button></div></div>}
- {panel==='notifications'&&<div className="notification-popover popover"><div className="popover-heading"><h3>Your updates</h3><button className="text-link" onClick={()=>{setNotificationsRead(true);notify('All notifications marked as read.');}}>Mark all read</button></div>{canAccess(validRole,'leave')&&pending.length>0?<button className="notification-item" onClick={()=>navigate('leave')}><span className="metric-icon peach"><CalendarDays size={18}/></span><span><strong>{pending.length} leave requests need a review</strong><small>A little planning makes a big difference.</small></span><ChevronRight size={15}/></button>:<p className="quiet-message">You’re all caught up.</p>}<div className="notification-item"><span className="metric-icon sage"><Sparkles size={18}/></span><span><strong>Welcome to your people workspace</strong><small>Your local sample data is ready to explore.</small></span></div></div>}
- {panel==='profile'&&<div className="profile-popover popover"><div className="profile-popover-user"><Avatar name="Sarah Lindqvist"/><div><strong>Sarah Lindqvist</strong><small>sarah@arcada.example</small></div></div><div className="popover-label">PREVIEW ROLE <span>Demo only</span></div>{(Object.keys(permissions) as Role[]).map(r=><button className={`role-option ${r===validRole?'selected':''}`} key={r} onClick={()=>switchRole(r)}><ShieldCheck size={15}/><span>{r}<small>{r==='Admin'?'Full workspace access':r==='Manager'?'People operations and analytics':r==='Viewer'?'Read-only people insights':'Finance modules only'}</small></span>{r===validRole&&<Check size={15}/>}</button>)}<div className="profile-note"><LockKeyhole size={13}/>Local permission preview, not a real sign-in.</div></div>}
- </header>
- {panel&&panel!=='workspace'&&<button className="popover-dismiss" aria-label="Close open menu" onClick={()=>setPanel(null)}/>}
- <main id="main-content" className="main-content" key={page}>
- {page==='not-found'?<div className="access-screen"><Search size={34}/><h1>We couldn’t find that page.</h1><p>Let’s get you back to your workspace.</p><button className="button primary" onClick={()=>navigate(permissions[validRole][0])}><ArrowLeft size={16}/>Back to workspace</button></div>:!canAccess(validRole,page)?<div className="access-screen"><LockKeyhole size={34}/><h1>A little privacy, by design.</h1><p>Your {validRole.toLowerCase()} role doesn’t have access to this page.</p><button className="button primary" onClick={()=>navigate(permissions[validRole][0])}><ArrowLeft size={16}/>Back to your workspace</button><button className="text-link" onClick={()=>setPanel('profile')}><LogIn size={15}/>Preview another role</button></div>:<>
- {(page==='dashboard'||page==='analytics')&&<Dashboard key={page} employees={employees} requests={requests} candidates={candidates} navigate={navigate} addEmployee={()=>setEditing('new')} role={validRole} department={department} setDepartment={setDepartment} period={period} setPeriod={setPeriod} notify={notify} analytics={page==='analytics'}/>}
- {page==='employees'&&<Employees employees={employees} role={validRole} onAdd={()=>setEditing('new')} onEdit={setEditing} onTerminate={setTerminating} notify={notify}/>}
- {page==='leave'&&<LeavePage employees={employees} requests={requests} setRequests={handleLeaveUpdate} role={validRole} notify={notify} audit={log}/>}
- {page==='recruitment'&&<Recruitment candidates={candidates} setCandidates={next=>{if(canEditPeople(validRole))setCandidates(next);}} role={validRole} notify={notify} audit={log}/>}
- {page==='performance'&&<Performance employees={employees} notify={notify}/>}
- {['payroll','expenses','invoicing'].includes(page)&&<Suspense fallback={<div className="loading-state">Opening your finance workspace…</div>}><Finance page={page} notify={notify} audit={log}/></Suspense>}
- {page==='settings'&&validRole==='Admin'&&<Settings audit={audit} notify={notify} log={log} workspace={workspace} setWorkspace={setWorkspace}/>}
- {page==='help'&&<Help/>}
- </>}
- </main></div>
- {editing&&canAccess(validRole,'employees')&&<Modal title={editing==='new'?'A new chapter starts here':canEditPeople(validRole)?'Edit employee':'Employee profile'} subtitle={editing==='new'?'Welcome someone new to your team.':`${editing.name} · ${editing.id}`} onClose={()=>setEditing(null)}><form onSubmit={e=>{e.preventDefault();if(!canEditPeople(validRole))return;const f=new FormData(e.currentTarget);const name=String(f.get('name')).trim();const email=String(f.get('email')).trim().toLowerCase();if(!name){notify('Please enter a full name.');return;}if(employees.some(x=>x.email.toLowerCase()===email&&(editing==='new'||x.id!==editing.id))){notify('An employee with this email already exists.');return;}const employee:Employee={...(editing==='new'?{id:`EMP-${Date.now().toString().slice(-7)}`,engagement:8,performance:80,leaveBalance:30}:editing),name,email,department:String(f.get('department')),title:String(f.get('title')).trim(),location:String(f.get('location')),startDate:String(f.get('startDate')),status:String(f.get('status')) as Employee['status']};setEmployees(prev=>editing==='new'?[employee,...prev]:prev.map(x=>x.id===employee.id?employee:x));log(`${editing==='new'?'Added':'Updated'} employee ${name}`);notify(editing==='new'?`${name} is now part of the team.`:'Employee details saved.');setEditing(null);}}><fieldset disabled={!canEditPeople(validRole)}><div className="form-grid"><label className="form-label">Full name<input name="name" defaultValue={editing==='new'?'':editing.name} required maxLength={80} placeholder="e.g. Alex Morgan"/></label><label className="form-label">Work email<input name="email" type="email" defaultValue={editing==='new'?'':editing.email} required placeholder="alex@company.com"/></label></div><div className="form-grid"><label className="form-label">Department<select name="department" defaultValue={editing==='new'?'Engineering':editing.department}>{departments.map(d=><option key={d}>{d}</option>)}</select></label><label className="form-label">Job title<input name="title" defaultValue={editing==='new'?'':editing.title} required maxLength={80} placeholder="e.g. Product Designer"/></label></div><div className="form-grid"><label className="form-label">Location<select name="location" defaultValue={editing==='new'?'Berlin':editing.location}>{['Berlin','Amsterdam','Remote','Munich','Hamburg','Vienna','Riyadh'].map(l=><option key={l}>{l}</option>)}</select></label><label className="form-label">Start date<input type="date" name="startDate" defaultValue={editing==='new'?'2026-10-17':editing.startDate} max="2026-10-17" min="1970-01-01" required/></label></div><label className="form-label">Employment status<select name="status" defaultValue={editing==='new'?'Active':editing.status}><option>Active</option><option>On leave</option>{editing!=='new'&&editing.status==='Exited'&&<option>Exited</option>}</select></label></fieldset><p className="form-note"><LockKeyhole size={13}/>Sample workspace. Please don’t enter sensitive personal data.</p><div className="modal-actions"><button type="button" className="button secondary" onClick={()=>setEditing(null)}>{canEditPeople(validRole)?'Cancel':'Close'}</button>{canEditPeople(validRole)&&<button type="submit" className="button primary">{editing==='new'?'Add employee':'Save changes'}</button>}</div></form></Modal>}
- {terminating&&validRole==='Admin'&&<Modal title="Record an employee departure" subtitle={`${terminating.name} · ${terminating.department}`} onClose={()=>setTerminating(null)}><form onSubmit={e=>{e.preventDefault();if(validRole!=='Admin')return;const f=new FormData(e.currentTarget);setEmployees(prev=>prev.map(x=>x.id===terminating.id?{...x,status:'Exited',exitDate:String(f.get('date')),exitReason:String(f.get('reason'))}:x));setRequests(prev=>prev.map(r=>r.employeeId===terminating.id&&r.status==='Pending'?{...r,status:'Declined'}:r));log(`Recorded departure for ${terminating.name}`);notify('Departure recorded. People analytics have been updated.');setTerminating(null);}}><div className="notice"><ShieldCheck size={18}/><p>The employee record is retained for accurate historical reporting. Pending leave requests will be closed.</p></div><label className="form-label">Last working day<input name="date" type="date" defaultValue="2026-10-17" min={terminating.startDate} max="2026-10-17" required/></label><label className="form-label">Reason for departure<select name="reason" required>{exitReasons.map(r=><option key={r}>{r}</option>)}</select></label><div className="modal-actions"><button type="button" className="button secondary" onClick={()=>setTerminating(null)}>Keep employee</button><button className="button danger" type="submit">Confirm departure</button></div></form></Modal>}
- {toast&&<div className="toast" role="status"><span><Check size={16}/></span><p>{toast}</p><button className="icon-button" aria-label="Dismiss message" onClick={()=>setToast('')}><X size={16}/></button></div>}
- </div>;
+import { lazy, Suspense, useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { QueryProvider } from '@/lib/query';
+import { AppShell } from '@/modules/shell/AppShell';
+import { useAuthStore } from '@/stores/auth';
+import { applyDocumentPreferences, useUIStore } from '@/stores/ui';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
+
+const Overview = lazy(() => import('@/modules/hr/pages/Overview'));
+const People = lazy(() => import('@/modules/hr/pages/People'));
+const PersonProfile = lazy(() => import('@/modules/hr/pages/PersonProfile'));
+const OrgChart = lazy(() => import('@/modules/hr/pages/OrgChart'));
+const Leave = lazy(() => import('@/modules/hr/pages/Leave'));
+const Attendance = lazy(() => import('@/modules/hr/pages/Attendance'));
+const Recruitment = lazy(() => import('@/modules/hr/pages/Recruitment'));
+const Performance = lazy(() => import('@/modules/hr/pages/Performance'));
+const Analytics = lazy(() => import('@/modules/hr/pages/Analytics'));
+const Compliance = lazy(() => import('@/modules/hr/pages/Compliance'));
+const Documents = lazy(() => import('@/modules/hr/pages/Documents'));
+const Settings = lazy(() => import('@/modules/hr/pages/Settings'));
+const Audit = lazy(() => import('@/modules/hr/pages/Audit'));
+
+const EssHome = lazy(() => import('@/modules/ess/pages/Home'));
+const EssLeave = lazy(() => import('@/modules/ess/pages/Leave'));
+const EssPayslips = lazy(() => import('@/modules/ess/pages/Payslips'));
+const EssProfile = lazy(() => import('@/modules/ess/pages/Profile'));
+const EssGoals = lazy(() => import('@/modules/ess/pages/Goals'));
+
+const FinanceOverview = lazy(() => import('@/modules/finance/pages/Overview'));
+const Payroll = lazy(() => import('@/modules/finance/pages/Payroll'));
+const FinanceExpenses = lazy(() => import('@/modules/finance/pages/Expenses'));
+const Invoices = lazy(() => import('@/modules/finance/pages/Invoices'));
+const FinanceCompliance = lazy(() => import('@/modules/finance/pages/Compliance'));
+const Reports = lazy(() => import('@/modules/finance/pages/Reports'));
+
+const SignIn = lazy(() => import('@/modules/system/pages/SignIn'));
+const Help = lazy(() => import('@/modules/system/pages/Help'));
+const NotFound = lazy(() => import('@/modules/system/pages/NotFound'));
+const Docs = lazy(() => import('@/modules/system/pages/Docs'));
+
+export default function App() {
+  const theme = useUIStore((s) => s.theme);
+  const locale = useUIStore((s) => s.locale);
+  const density = useUIStore((s) => s.density);
+  const hydrate = useAuthStore((s) => s.hydrate);
+  const location = useLocation();
+
+  useEffect(() => {
+    applyDocumentPreferences(theme, locale, density);
+  }, [theme, locale, density]);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => applyDocumentPreferences(theme, locale, density);
+    media.addEventListener('change', handler);
+    return () => media.removeEventListener('change', handler);
+  }, [theme, locale, density]);
+
+  return (
+    <QueryProvider>
+      <TooltipProvider delayDuration={200}>
+        <Toaster position="bottom-right" toastOptions={{ style: { fontSize: '12px', borderRadius: '10px' } }} />
+        <Suspense fallback={<PageSkeleton />} key={location.pathname.split('/')[1]}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/hr" replace />} />
+            <Route path="/signin" element={<SignIn />} />
+
+            <Route path="/hr" element={<AppShell app="hr" />}>
+              <Route index element={<Overview />} />
+              <Route path="people" element={<People />} />
+              <Route path="people/:id" element={<PersonProfile />} />
+              <Route path="org" element={<OrgChart />} />
+              <Route path="leave" element={<Leave />} />
+              <Route path="attendance" element={<Attendance />} />
+              <Route path="recruitment" element={<Recruitment />} />
+              <Route path="performance" element={<Performance />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="compliance" element={<Compliance />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="audit" element={<Audit />} />
+            </Route>
+
+            <Route path="/me" element={<AppShell app="ess" />}>
+              <Route index element={<EssHome />} />
+              <Route path="leave" element={<EssLeave />} />
+              <Route path="payslips" element={<EssPayslips />} />
+              <Route path="attendance" element={<Attendance self />} />
+              <Route path="profile" element={<EssProfile />} />
+              <Route path="expenses" element={<FinanceExpenses self />} />
+              <Route path="goals" element={<EssGoals />} />
+              <Route path="documents" element={<Documents self />} />
+            </Route>
+
+            <Route path="/finance" element={<AppShell app="finance" />}>
+              <Route index element={<FinanceOverview />} />
+              <Route path="payroll" element={<Payroll />} />
+              <Route path="expenses" element={<FinanceExpenses />} />
+              <Route path="invoices" element={<Invoices />} />
+              <Route path="compliance" element={<FinanceCompliance />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="attendance" element={<Attendance finance />} />
+            </Route>
+
+            <Route path="/help" element={<Help />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </TooltipProvider>
+    </QueryProvider>
+  );
 }
-export default App;

@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# test output
+test-results/
+playwright-report/
+blob-report/
+coverage/
+
+# local artifacts
+artifacts/screenshots/
+.DS_Store
+*.log
