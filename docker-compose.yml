@@ -1,0 +1,91 @@
+# Local development stack for the Arcada workspace.
+#   docker compose up -d db studio mailpit minio
+#   npm run db:migrate && npm run db:seed
+# The Vite dev server stays on the host (npm run dev) and talks to these.
+name: arcada
+
+services:
+  db:
+    image: supabase/postgres:15.8.1.060
+    container_name: arcada-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-arcada}
+      # Supabase images expect these roles to exist for the auth schema.
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      JWT_EXP: 3600
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+    ports:
+      - '${POSTGRES_PORT:-54322}:5432'
+    volumes:
+      - arcada-db-data:/var/lib/postgresql/data
+      - ./supabase/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./supabase/seed.sql:/docker-entrypoint-initdb.d/zz-seed.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d ${POSTGRES_DB:-arcada}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  studio:
+    image: supabase/studio:20240916
+    container_name: arcada-studio
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SUPABASE_URL: http://db:5432
+      STUDIO_PG_META_URL: http://db:5432
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - '${STUDIO_PORT:-54323}:3000'
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: arcada-mail
+    restart: unless-stopped
+    ports:
+      - '${MAILPIT_SMTP_PORT:-54325}:1025'
+      - '${MAILPIT_UI_PORT:-54324}:8025'
+
+  minio:
+    image: minio/minio:latest
+    container_name: arcada-storage
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-arcada}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-arcada-local-dev}
+    ports:
+      - '${MINIO_PORT:-54327}:9000'
+      - '${MINIO_CONSOLE_PORT:-54326}:9001'
+    volumes:
+      - arcada-storage-data:/data
+
+  edge-runtime:
+    image: supabase/edge-runtime:v1.58.4
+    container_name: arcada-edge
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SUPABASE_URL: http://db:5432
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-local-anon-key}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-local-service-role-key}
+      VERIFY_JWT: 'false'
+    command: ['start', '--main-service', '/home/deno/functions/main']
+    ports:
+      - '${EDGE_PORT:-54328}:9000'
+    volumes:
+      - ./supabase/functions:/home/deno/functions:ro
+
+volumes:
+  arcada-db-data:
+  arcada-storage-data:

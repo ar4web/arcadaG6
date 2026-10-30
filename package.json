@@ -10,7 +10,12 @@
     "typecheck": "tsc -b --pretty",
     "preview": "vite preview --host 0.0.0.0",
     "test:render": "npm run build:ssr && node scripts/render-check.mjs",
-    "build:ssr": "vite build --config vite.ssr.config.ts"
+    "build:ssr": "vite build --config vite.ssr.config.ts",
+    "db:lint": "node scripts/check-migrations.mjs",
+    "db:up": "docker compose up -d db studio mailpit minio",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d db",
+    "db:seed": "docker compose exec -T db psql -U postgres -d arcada -f /docker-entrypoint-initdb.d/zz-seed.sql"
   },
   "dependencies": {
     "@date-fns/tz": "^1.2.0",
@@ -74,6 +79,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "happy-dom": "^21.0.4",
+    "pgsql-parser": "^3.11.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1"

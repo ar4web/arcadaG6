@@ -2,6 +2,20 @@
 
 declare const __APP_VERSION__: string;
 
+interface ImportMetaEnv {
+  readonly VITE_SUPABASE_URL?: string;
+  readonly VITE_SUPABASE_ANON_KEY?: string;
+  readonly VITE_DATA_SOURCE?: 'mock' | 'supabase';
+  readonly VITE_APP_NAME?: string;
+  readonly VITE_APP_VERSION?: string;
+  readonly VITE_DEFAULT_LOCALE?: 'en' | 'ar';
+  readonly VITE_DEFAULT_TIMEZONE?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module 'html2pdf.js' {
   interface Html2PdfOptions {
     margin?: number | number[];

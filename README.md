@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# Arcada — Qimma Group People Suite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A bilingual (EN / AR with full RTL) HR workspace for a Saudi company: HR administration,
+employee self-service and finance operations in one product.
 
-Currently, two official plugins are available:
+**Phase 1 is complete** — every screen renders with realistic demo data and the product
+looks and behaves like the finished thing. **Phase 2 (backend)** has the database, auth and
+infrastructure in place; wiring each screen to Supabase is the remaining work.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+Employees     ~220 records across 8 departments and 4 locations
+Payroll       13 monthly runs, GOSI + WPS modelled on Saudi statutory rates
+Compliance    Iqama, passport, contract and insurance expiry tracking
+Apps          /hr (admin) · /me (employee self-service) · /finance
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Quick start
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev          # http://localhost:5173 — mock data, no backend needed
 ```
+
+The app boots straight into an admin session so the whole workspace is explorable.
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Vite dev server on `0.0.0.0:5173` |
+| `npm run build` | Type-check (`tsc -b`) then production build |
+| `npm run preview` | Serve the production build |
+| `npm run lint` | ESLint, zero-error policy |
+| `npm run typecheck` | TypeScript project build |
+| `npm run test:render` | Headless render check: 31 routes + 39 widgets |
+| `npm run db:lint` | Parse every migration and the seed with a real Postgres parser |
+| `npm run db:up` / `db:down` / `db:reset` | Local Postgres + Studio + Mailpit + MinIO |
+| `npm run db:seed` | Load the demo dataset |
+
+Further reading: [ARCHITECTURE.md](ARCHITECTURE.md) · [DEPLOY.md](DEPLOY.md)
+
+## Architecture
+
+```
+src/
+  modules/            feature slices, each owning its routes and screens
+    hr/  ess/  finance/  system/  shell/
+  components/         design system (ui/), charts/, widgets/, layout primitives
+  services/           17 domain modules — the only place that talks to data
+  lib/                utils, i18n, mock store, query client, supabase client
+  stores/             zustand: ui, auth, layout, columns
+  types/              domain contract + generated-shape database types
+supabase/
+  migrations/         21 idempotent SQL files: schema, enums, RLS, views, storage
+  functions/          edge functions (fatoora, email, whatsapp, pdf, wps, gosi)
+scripts/              render check, migration linter, seed generator
+```
+
+**Data flow.** Screens never touch a database. They call `src/services/*`, which return the
+same shapes whether they are backed by the in-memory mock store (`VITE_DATA_SOURCE=mock`)
+or by Supabase (`VITE_DATA_SOURCE=supabase`). React Query owns caching and mutation
+invalidation.
+
+**Design system.** Warm sage/terracotta palette defined as CSS custom properties in
+`src/index.css` and bridged into Tailwind v4 with `@theme inline`; light and dark themes,
+tabular numerals, RTL-aware logical properties throughout.
+
+## Features
+
+- **Dashboard** — 39 draggable widgets (KPIs, Recharts visualisations, watchlists, tables)
+  with per-user layout persistence via `@dnd-kit`.
+- **People** — virtualised directory (`@tanstack/react-virtual`), saved column layouts,
+  drag-reordered columns, profile pages with org chain, compensation, documents and timeline.
+- **Leave & attendance** — request/approve flows, policy copy that quotes Saudi labour law,
+  calendar heat maps.
+- **Payroll & finance** — runs, payslips, GOSI breakdown, WPS export, ZATCA invoice screens.
+- **Recruitment, performance, compliance, documents, org chart, audit log, settings.**
+- **Command palette** (`⌘K` / `Ctrl+K`), role switching, light/dark, EN/AR, print styles,
+  reduced-motion support.
+
+## Configuration
+
+Copy `.env.example` to `.env`. The only switch that matters for Phase 1 vs Phase 2:
+
+```env
+VITE_DATA_SOURCE=mock       # design preview, zero setup
+VITE_DATA_SOURCE=supabase   # real database (needs VITE_SUPABASE_URL + anon key)
+```
+
+## Testing
+
+There is no browser binary in constrained CI images, so the smoke test renders every route
+through an SSR bundle inside `happy-dom`:
+
+```bash
+npm run test:render
+```
+
+It fails on thrown errors, React warnings, or `undefined` / `NaN` / `[object Object]` leaking
+into markup — the class of bug a type-checker cannot see. Playwright specs land in Phase 3
+once a browser is available.
+
+## Roadmap
+
+- **Phase 1 — Foundation & visual layer** ✅
+- **Phase 2 — Backend, database & wiring** — migrations, RLS, auth, services (in progress)
+- **Phase 3 — Polish, performance & delivery** — Playwright, CI, seed, docs
