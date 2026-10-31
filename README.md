@@ -76,6 +76,10 @@ layer (`--canvas`, `--surface`, `--ink`, `--primary`, …) bridged into Tailwind
 based (`data-theme`, `data-hc`, `data-reduce-motion`, `dir`), and `npm run check:contrast`
 audits every text/background pair against WCAG AA in dark, light and high-contrast.
 
+Both vocabularies work in markup: the spec names (`bg-bg-card`, `text-text-secondary`,
+`border-border`, `bg-accent-2`, `rounded-card`, `p-md`, `text-sm`) and the semantic names
+(`bg-surface`, `text-ink-3`, `bg-primary`). `/docs` renders a live token reference.
+
 ## Features
 
 - **Dashboard** — 39 draggable widgets (KPIs, Recharts visualisations, watchlists, tables)

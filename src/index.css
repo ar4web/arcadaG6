@@ -126,10 +126,11 @@
   --primary-contrast: var(--text-inverse);
 
   /* Orange is the secondary emphasis colour. */
-  --accent-ink: color-mix(in srgb, var(--accent-2) 58%, #ffffff);
-  --accent-soft: var(--accent-2-dim);
-  --accent-soft-2: color-mix(in srgb, var(--accent-2) 24%, var(--bg));
+  --accent-ink: color-mix(in srgb, var(--accent) 55%, #ffffff);
+  --accent-soft: var(--accent-dim);
+  --accent-soft-2: color-mix(in srgb, var(--accent) 24%, var(--bg));
   --accent-contrast: var(--text-inverse);
+  --accent-2-contrast: var(--text-inverse);
 
   --success-ink: color-mix(in srgb, var(--success) 52%, #ffffff);
   --success-soft: var(--success-dim);
@@ -204,7 +205,8 @@
   --shadow-pop: 0 2px 6px rgb(15 23 42 / 0.08), 0 16px 40px -12px rgb(15 23 42 / 0.2);
   --primary-contrast: #ffffff;
   --accent-contrast: #ffffff;
-  --accent-ink: #9a3412;
+  --accent-2-contrast: #ffffff;
+  --accent-ink: #0f766e;
   --success-ink: #15803d;
   --warning-ink: #b45309;
   --danger-ink: #b91c1c;
@@ -274,25 +276,47 @@
   --color-primary-soft-2: var(--primary-soft-2);
   --color-primary-ring: var(--primary-ring);
 
-  --color-accent: var(--accent-2);
+  /* Spec-named palette (mirrors the Tailwind config names). */
+  --color-bg: var(--bg);
+  --color-bg-card: var(--bg-card);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-input: var(--bg-input);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-2: var(--accent-2);
+  --color-accent-2-dim: var(--accent-2-dim);
+
+  /* Legacy semantic aliases kept so screens never break on a palette change. */
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
   --color-accent-soft-2: var(--accent-soft-2);
-
   --color-brand: var(--accent);
   --color-brand-strong: var(--accent-strong);
   --color-brand-soft: var(--accent-dim);
   --color-primary-contrast: var(--primary-contrast);
   --color-accent-contrast: var(--accent-contrast);
+  --color-accent-2-contrast: var(--accent-2-contrast);
 
   --color-success: var(--success-ink);
   --color-success-soft: var(--success-soft);
+  --color-success-dim: var(--success-dim);
   --color-warning: var(--warning-ink);
   --color-warning-soft: var(--warning-soft);
+  --color-warning-dim: var(--warning-dim);
   --color-danger: var(--danger-ink);
   --color-danger-soft: var(--danger-soft);
+  --color-danger-dim: var(--danger-dim);
   --color-info: var(--info-ink);
   --color-info-soft: var(--info-soft);
+  --color-info-dim: var(--info-dim);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -303,10 +327,37 @@
   --color-chart-7: var(--chart-7);
   --color-chart-8: var(--chart-8);
 
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
+  --radius-sm: 4px;
+  --radius-md: 5px;
+  --radius-lg: 5px;
+  --radius-xl: 6px;
+  /* Named radii from the spec. */
+  --radius-card: 5px;
+  --radius-input: 5px;
+  --radius-btn: 5px;
+
+  /* Named spacing steps (p-md, gap-lg, …). */
+  --spacing-xs: 4px;
+  --spacing-sm: 6px;
+  --spacing-md: 10px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+
+  /* Type scale from the spec, with paired line heights so utilities stay valid. */
+  --text-xs: 11px;
+  --text-xs--line-height: 16px;
+  --text-sm: 13px;
+  --text-sm--line-height: 20px;
+  --text-base: 14px;
+  --text-base--line-height: 21px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+
+  --default-transition-duration: 150ms;
 
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);

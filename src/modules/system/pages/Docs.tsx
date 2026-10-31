@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardHeading } from '@/components/ui/card';
 import { Badge } from '@/components/ui/misc';
+import { cn } from '@/lib/utils';
 
 const SECTIONS = [
   {
@@ -57,6 +58,50 @@ export default function Docs() {
             </Card>
           ))}
         </div>
+
+        <Card className="mt-3 p-4">
+          <CardHeading title="Token reference" description="Live swatches — these are the utilities every screen is built from." />
+          <div className="px-5 pb-5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[
+                { label: '--bg', className: 'bg-bg ring-border' },
+                { label: '--bg-card', className: 'bg-bg-card ring-border' },
+                { label: '--bg-elevated', className: 'bg-bg-elevated ring-border' },
+                { label: '--bg-input', className: 'bg-bg-input ring-border-strong' },
+                { label: '--accent', className: 'bg-accent' },
+                { label: '--accent-strong', className: 'bg-accent-strong' },
+                { label: '--accent-dim', className: 'bg-accent-dim' },
+                { label: '--accent-2', className: 'bg-accent-2' },
+                { label: '--accent-2-dim', className: 'bg-accent-2-dim' },
+                { label: '--success', className: 'bg-success' },
+                { label: '--warning', className: 'bg-warning' },
+                { label: '--danger', className: 'bg-danger' },
+              ].map((swatch) => (
+                <div key={swatch.label} className="min-w-0">
+                  <div className={cn('h-10 rounded-card ring-1', swatch.className)} />
+                  <p className="mt-1 truncate text-xs text-text-tertiary">{swatch.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-card border border-border bg-bg-elevated p-md">
+                <p className="text-sm font-medium text-text-primary">Aa 14px · Inter</p>
+                <p className="text-xs text-text-secondary">Aa 13px · secondary text</p>
+                <p className="text-xs text-text-tertiary">Aa 11px · tertiary metadata</p>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="grid h-11 place-items-center rounded-card border border-border bg-bg-card text-xs text-text-secondary">card</div>
+                <div className="grid h-11 place-items-center rounded-input border border-border bg-bg-card text-xs text-text-secondary">input</div>
+                <div className="grid h-11 place-items-center rounded-btn bg-accent-2 text-xs font-medium text-accent-2-contrast">btn</div>
+              </div>
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-text-tertiary">
+              Radii 5px · row height 36px · header 48px · rail 240px / 48px collapsed. High contrast and reduced motion
+              are honoured through data-hc and data-reduce-motion on the html element.
+            </p>
+          </div>
+        </Card>
 
         <Card className="mt-3 p-4">
           <CardHeading title="Folder structure" />

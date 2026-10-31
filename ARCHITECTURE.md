@@ -43,6 +43,21 @@ screens  →  services  →  transport  →  supabase | mock
 | Semantic | `--canvas`, `--surface`, `--surface-2/3`, `--ink`, `--ink-2/3/4`, `--line`, `--primary*`, `--accent-*`, `--success-*`… | every screen via Tailwind utilities |
 | Accessible | `data-theme`, `data-hc`, `data-reduce-motion`, `dir` on `<html>` | `applyDocumentPreferences()` in `src/stores/ui.ts` |
 
+The bridge also exposes the raw spec names as utilities, so a component can be written
+against either vocabulary:
+
+| Utility | Token | Example |
+| --- | --- | --- |
+| `bg-bg` · `bg-bg-card` · `bg-bg-elevated` · `bg-bg-input` | `--bg*` | page vs card vs input wells |
+| `text-text-primary/secondary/tertiary` | `--text-*` | type ramp |
+| `border-border` · `border-border-strong` | `--border*` | hairlines |
+| `bg-accent` · `bg-accent-strong` · `bg-accent-dim` | `--accent*` | teal brand |
+| `bg-accent-2` · `bg-accent-2-dim` | `--accent-2*` | orange secondary CTA |
+| `bg-success` · `bg-success-dim` (same for warning/danger/info) | signals | badges |
+| `rounded-card` · `rounded-input` · `rounded-btn` | 5px | geometry |
+| `p-xs/sm/md/lg/xl` | `--space-*` | spacing |
+| `text-xs/sm/base/lg/xl/2xl` | 11/13/14/16/20/24 | type scale |
+
 `npm run check:contrast` resolves the `var()`/`color-mix()` chains and asserts WCAG AA for
 body text, muted text, button labels, badges and the active sidebar item across dark, light
 and high-contrast — it fails the build script if a token drifts.
